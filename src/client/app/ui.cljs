@@ -75,19 +75,20 @@
     {:molecule-particles test-molecules})
   (componentDidMount [this]
     (let []
-      (go-loop [state {:elapsed 0}]
+      (go-loop [state {:elapsed 0 :molecule-particles []}]
                (<! (timeout moles/wait-time))
                ;(println "11 times a sec?")
-               (let [{:keys [molecule-particles] :as new-state} (accumulate-state state)]
-                 (om/update-state! this assoc :molecule-particles molecule-particles)
-                 (println "IN LOCAL STATE: " (count molecule-particles))
-                 (recur new-state)))))
+               (when (< (:elapsed state) 3000)
+                 (let [{:keys [molecule-particles elapsed] :as new-state} (accumulate-state state)]
+                   (om/update-state! this assoc :molecule-particles molecule-particles)
+                   (println "IN LOCAL STATE: " (count molecule-particles) "at" elapsed)
+                   (recur new-state))))))
   (componentWillUnmount [this]
     (om/update-state! this dissoc :molecule-particles))
   (render [this]
     (let [particles (om/get-state this :molecule-particles)
           _ (println "In render with " (count particles))]
-      (dom/svg #js{:className "back" :height "3000px" :width "755px"}
+      (dom/svg #js{:className "back" :height (str moles/height "px") :width (str moles/width "px")}
                (dom/g nil
                       (map rect-comp particles))))))
 (def ui-molecules (om/factory Molecules {:keyfn :id}))

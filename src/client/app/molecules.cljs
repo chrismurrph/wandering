@@ -14,8 +14,8 @@
     ;(when-not res (u/log "Going off the screen"))
     res))
 
-(def width 800)
-(def height 600)
+(def width 755)
+(def height 3000)
 (def centre-distance (/ height 2))
 
 (defn calc-distance-saturation
