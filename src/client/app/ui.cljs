@@ -7,6 +7,7 @@
             [reagent.core :as r]
             [cljsjs.showdown :as showdown]
             [app.molecules :as moles]
+            [app.utils :as u]
             [cljs.core.async :as async
              :refer [<! >! chan close! put! timeout]])
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
@@ -51,11 +52,14 @@
 (def rect-comp (om/factory Rect {:keyfn :id}))
 
 (defn update-state [state]
-  (let [res (-> state
-            (update :elapsed #(inc %))
-            moles/emit-molecule-particles
-            (update :molecule-particles (fn [molecule-particles] (map moles/move-molecule-symbol molecule-particles))))
-        _ (moles/draw-state res)]
+  (let [res (as-> state $
+                  (update $ :elapsed #(inc %))
+                  (moles/emit-molecule-particles $)
+                  (update $ :molecule-particles #(map moles/move-molecule-symbol %))
+                  ;(u/probe "state" $)
+                  )
+        ;_ (moles/draw-state res)
+        ]
     res))
 
 (def test-molecules [{:id 1 :x 10 :y 10}
@@ -68,18 +72,22 @@
 (defui ^once Molecules
   Object
   (initLocalState [this]
-    {:molecules test-molecules})
+    {:molecule-particles test-molecules})
   (componentDidMount [this]
     (let []
       (go-loop [state {:molecule-particles [] :elapsed 0}]
                (<! (timeout moles/wait-time))
                ;(println "11 times a sec?")
-               (let [new-state (update-state state)]
+               (let [{:keys [molecule-particles] :as new-state} (update-state state)]
+                 (om/update-state! this assoc :molecule-particles molecule-particles)
+                 (println "IN LOCAL STATE: " molecule-particles)
                  (recur new-state)))))
   (render [this]
-    (let []
+    (let [particles (om/get-state this :molecule-particles)
+          _ (println "In render with " (count particles))]
       (dom/svg #js{:className "back" :height "3000px"}
-               (map rect-comp (om/get-state this :molecules))))))
+               (dom/g nil
+                      (map rect-comp particles))))))
 (def ui-molecules (om/factory Molecules {:keyfn :id}))
 
 ;;
@@ -122,12 +130,12 @@
     (let [{:keys [title items ui/new-item-label] :or {ui/new-item-label ""}} (om/props this)
           _ (println "Count items: " (count items))]
       (dom/div nil
-        (dom/h4 nil title)
-        (dom/input #js {:value    new-item-label
-                        :onChange (fn [evt] (m/set-string! this :ui/new-item-label :event evt))})
-        (dom/button #js {:onClick #(om/transact! this `[(app/add-item {:label ~new-item-label})])} "+")
-        (dom/ul nil
-          (map ui-item items))))))
+               (dom/h4 nil title)
+               (dom/input #js {:value    new-item-label
+                               :onChange (fn [evt] (m/set-string! this :ui/new-item-label :event evt))})
+               (dom/button #js {:onClick #(om/transact! this `[(app/add-item {:label ~new-item-label})])} "+")
+               (dom/ul nil
+                       (map ui-item items))))))
 (def ui-list (om/factory MyList))
 
 (defui ^:once Root
@@ -141,6 +149,6 @@
           _ (println "list in size: " (count (:markdown (first plans))))
           ]
       (dom/div #js{:key react-key}
-        (dom/h4 nil "Header")
+               (dom/h4 nil "Header")
                (dom/div nil
                         (map ui-showdown-plan plans))))))

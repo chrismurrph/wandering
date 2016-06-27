@@ -20,8 +20,7 @@
 
 (defn calc-distance-saturation
   [entity]
-  (let [[x y] (:pos entity)
-        max-saturation (:max-saturation entity)
+  (let [{:keys [x y max-saturation]} entity
         edge-distance (mu/closest-edge-distance x y width height)
         brightness (/ (- centre-distance edge-distance) centre-distance)]
     (* brightness max-saturation)))
@@ -39,8 +38,7 @@
     ))
 
 (defn draw-entity [entity]
-  (let [[x y] (:pos entity)
-        angle (:angle entity)
+  (let [{:keys [x y angle]} entity
         ;z (:z entity)
         screen-x x
         screen-y y]
@@ -77,8 +75,8 @@
   (doseq [molecule (:molecule-particles state)]
     (draw-entity molecule)))
 
-(def fps 11)
-(def wait-time (/ 1000 11))
+(def fps 1)
+(def wait-time (/ 1000 fps))
 (def gray-saturation 30)                                         ; 200 is normal
 (def gray-colour [245,245,220])
 (def centre-pos [(/ width 2) (/ height 2)])
@@ -88,12 +86,11 @@
 (def red [255,0,0])
 
 (defn move-molecule-symbol [molecule-symbol]
-  (let [[x y] (:pos molecule-symbol)
-        dir (:dir molecule-symbol)
+  (let [{:keys [x y dir]} molecule-symbol
         [delta-x delta-y] (mu/radians->vector dir 1)
         [new-x new-y] (mu/translate-v2 [x y] [delta-x delta-y])]
     ;(u/log new-x) (u/log new-y)
-    (assoc molecule-symbol :pos [new-x new-y])))
+    (assoc molecule-symbol :x new-x :y new-y)))
 
 ;; CO2 dark blue, CO yellow, O2 black, CH4 red
 (def gas-infos [
@@ -120,11 +117,15 @@
   (let [x-random (mu/random-float (- hatchery-size) hatchery-size)
         y-random (mu/random-float (- hatchery-size) hatchery-size)
         dir (mu/calc-direction [x-random y-random])
-        pos [(+ (x-val centre-pos) x-random)
-             (+ (y-val centre-pos) y-random)]
+        ;{:keys [x y]} [(+ (x-val centre-pos) x-random)
+        ;     (+ (y-val centre-pos) y-random)]
+        x (+ (x-val centre-pos) x-random)
+        y (+ (y-val centre-pos) y-random)
         pick (random-pick)
         stand-out (mu/chance-one-in 10)]
-    {:pos pos
+    {:id (gensym)
+     :x x
+     :y y
      :dir dir
      :max-saturation (if stand-out (:max-saturation pick) gray-saturation)
      :z (if stand-out 1.0 0.1)
@@ -134,4 +135,4 @@
      :angle (mu/random-angle)}))
 
 (defn emit-molecule-particles [state]
-  (if (mu/chance-one-in 5) (update-in state [:molecule-particles] conj (create-molecule-symbol)) state))
+  (if (mu/chance-one-in 5) (update state :molecule-particles conj (create-molecule-symbol)) state))
