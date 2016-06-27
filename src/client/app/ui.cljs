@@ -24,35 +24,6 @@
       (dom/li nil label))))
 (def ui-item (om/factory Item {:keyfn :id}))
 
-(defui ^:once HiccupPlan
-  static uc/InitialAppState
-  (initial-state [clz {:keys [id text]}] {:id id :text text})
-  static om/IQuery
-  (query [this] [:id :text])
-  static om/Ident
-  (ident [this {:keys [id]}] [:plan/by-id id])
-  Object
-  (render [this]
-    (let [{:keys [id text]} (om/props this)
-          html (r/as-element text)]
-      html)))
-(def ui-hiccup-plan (om/factory HiccupPlan {:keyfn :id}))
-
-(defui ^:once RawPlan
-  static uc/InitialAppState
-  (initial-state [clz {:keys [id text]}] {:id id :text text})
-  static om/IQuery
-  (query [this] [:id :text])
-  static om/Ident
-  (ident [this {:keys [id]}] [:plan/by-id id])
-  Object
-  (render [this]
-    (let [{:keys [id text]} (om/props this)
-          ;text (str "<p>Some para</p><ul><li>One</li><li>Two</li></ul>")
-          ]
-      (dom/div #js {:dangerouslySetInnerHTML #js {:__html text}} nil))))
-(def ui-raw-plan (om/factory RawPlan {:keyfn :id}))
-
 (defn convert-to-html [markdown]
   ;; note the syntax below: js/VarFromExternsFile.property
   ;; the dot on the end is the usual Clojure interop syntax: (Constructor. constructor-arg constructor-arg)
@@ -87,8 +58,17 @@
         _ (moles/draw-state res)]
     res))
 
+(def test-molecules [{:id 1 :x 10 :y 10}
+                     {:id 2 :x 20 :y 20}
+                     {:id 3 :x 50 :y 50}
+                     {:id 4 :x 60 :y 100}
+                     {:id 5 :x 70 :y 220}
+                     {:id 6 :x 80 :y 340}])
+
 (defui ^once Molecules
   Object
+  (initLocalState [this]
+    {:molecules test-molecules})
   (componentDidMount [this]
     (let []
       (go-loop [state {:molecule-particles [] :elapsed 0}]
@@ -99,12 +79,7 @@
   (render [this]
     (let []
       (dom/svg #js{:className "back" :height "3000px"}
-               (rect-comp {:id 1 :x 10 :y 10})
-               (rect-comp {:id 2 :x 20 :y 20})
-               (rect-comp {:id 3 :x 50 :y 50})
-               (rect-comp {:id 4 :x 60 :y 100})
-               (rect-comp {:id 5 :x 70 :y 220})
-               (rect-comp {:id 6 :x 80 :y 340})))))
+               (map rect-comp (om/get-state this :molecules))))))
 (def ui-molecules (om/factory Molecules {:keyfn :id}))
 
 ;;

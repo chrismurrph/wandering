@@ -2,3 +2,6 @@ demo.iml
 marketing_for_kevin
 wandering.iml
 figwheel_server.log
+.idea
+/resources/public/js/compiled
+/target

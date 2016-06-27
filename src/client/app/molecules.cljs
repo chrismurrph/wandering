@@ -71,8 +71,8 @@
 
 (defn draw-state [state]
   ;(u/log "In draw-state")
-  (q/background (current-bg-colour))
-  (q/no-stroke)
+  ;(q/background (current-bg-colour))
+  ;(q/no-stroke)
   ;(u/log "molecule-particles count " (count (:molecule-particles state)))
   (doseq [molecule (:molecule-particles state)]
     (draw-entity molecule)))
@@ -107,6 +107,12 @@
   (let [idx (rand-int 4)]
     ;(u/log "Got " colour-idx)
     (get gas-infos idx)))
+
+;; Future enhancement is for right at start there to be much bigger hatchery area and many more created
+;; This way user won't be distracted by seeing them spread to the outside
+(def hatchery-size 20)
+(defn x-val [vec] (first vec))
+(defn y-val [vec] (second vec))
 
 ;; If one every fps is too much we can be random
 ;; If need more then we won't use conj but concat(?), and return a vector here
