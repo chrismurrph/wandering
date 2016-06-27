@@ -75,7 +75,7 @@
   (doseq [molecule (:molecule-particles state)]
     (draw-entity molecule)))
 
-(def fps 1)
+(def fps 11)
 (def wait-time (/ 1000 fps))
 (def gray-saturation 30)                                         ; 200 is normal
 (def gray-colour [245,245,220])
@@ -107,15 +107,15 @@
 
 ;; Future enhancement is for right at start there to be much bigger hatchery area and many more created
 ;; This way user won't be distracted by seeing them spread to the outside
-(def hatchery-size 20)
+(def hatchery-area-size 20)
 (defn x-val [vec] (first vec))
 (defn y-val [vec] (second vec))
 
 ;; If one every fps is too much we can be random
 ;; If need more then we won't use conj but concat(?), and return a vector here
 (defn create-molecule-symbol []
-  (let [x-random (mu/random-float (- hatchery-size) hatchery-size)
-        y-random (mu/random-float (- hatchery-size) hatchery-size)
+  (let [x-random (mu/random-float (- hatchery-area-size) hatchery-area-size)
+        y-random (mu/random-float (- hatchery-area-size) hatchery-area-size)
         dir (mu/calc-direction [x-random y-random])
         ;{:keys [x y]} [(+ (x-val centre-pos) x-random)
         ;     (+ (y-val centre-pos) y-random)]
@@ -135,4 +135,7 @@
      :angle (mu/random-angle)}))
 
 (defn emit-molecule-particles [state]
-  (if (mu/chance-one-in 5) (update state :molecule-particles conj (create-molecule-symbol)) state))
+  (let [num-particles (count (:molecule-particles state))]
+    (if (and (< num-particles 100) (mu/chance-one-in 5))
+      (update state :molecule-particles conj (create-molecule-symbol))
+      state)))

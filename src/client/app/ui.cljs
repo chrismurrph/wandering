@@ -51,7 +51,7 @@
       (dom/rect (clj->js rect-props)))))
 (def rect-comp (om/factory Rect {:keyfn :id}))
 
-(defn update-state [state]
+(defn accumulate-state [state]
   (let [res (as-> state $
                   (update $ :elapsed #(inc %))
                   (moles/emit-molecule-particles $)
@@ -75,17 +75,19 @@
     {:molecule-particles test-molecules})
   (componentDidMount [this]
     (let []
-      (go-loop [state {:molecule-particles [] :elapsed 0}]
+      (go-loop [state {:elapsed 0}]
                (<! (timeout moles/wait-time))
                ;(println "11 times a sec?")
-               (let [{:keys [molecule-particles] :as new-state} (update-state state)]
+               (let [{:keys [molecule-particles] :as new-state} (accumulate-state state)]
                  (om/update-state! this assoc :molecule-particles molecule-particles)
-                 (println "IN LOCAL STATE: " molecule-particles)
+                 (println "IN LOCAL STATE: " (count molecule-particles))
                  (recur new-state)))))
+  (componentWillUnmount [this]
+    (om/update-state! this dissoc :molecule-particles))
   (render [this]
     (let [particles (om/get-state this :molecule-particles)
           _ (println "In render with " (count particles))]
-      (dom/svg #js{:className "back" :height "3000px"}
+      (dom/svg #js{:className "back" :height "3000px" :width "755px"}
                (dom/g nil
                       (map rect-comp particles))))))
 (def ui-molecules (om/factory Molecules {:keyfn :id}))
