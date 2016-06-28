@@ -5,7 +5,6 @@
             [untangled.client.core :as uc]
             [untangled.client.mutations :as m]
             [reagent.core :as r]
-            [cljsjs.showdown :as showdown]
             [app.molecules :as moles]
             [app.utils :as u]
             [cljs.core.async :as async
@@ -24,18 +23,6 @@
     (let [{:keys [id label]} (om/props this)]
       (dom/li nil label))))
 (def ui-item (om/factory Item {:keyfn :id}))
-
-(defn convert-to-html [markdown]
-  ;; note the syntax below: js/VarFromExternsFile.property
-  ;; the dot on the end is the usual Clojure interop syntax: (Constructor. constructor-arg constructor-arg)
-  ;; #js {:tables true}
-  (let [converter (js/Showdown.converter.)
-        ;_ converter.setOption('optionKey', 'value');
-        ;; Apparently this function doesn't even exist
-        ;_ (.setOption converter "tables" true)
-        ]
-    ;; methods you call will generally need to be called out as prototype values in the externs
-    (.makeHtml converter markdown)))
 
 (defui Rect
   Object
@@ -70,6 +57,8 @@
                      {:id 6 :x 80 :y 340}])
 
 (defui ^once Molecules
+  static om/IQuery
+  (query [this] [:elapsed])
   Object
   (initLocalState [this]
     {:molecule-particles test-molecules})
@@ -77,17 +66,21 @@
     (let []
       (go-loop [state {:elapsed 0 :molecule-particles []}]
                (<! (timeout moles/wait-time))
-               ;(println "11 times a sec?")
                (when (< (:elapsed state) 3000)
                  (let [{:keys [molecule-particles elapsed] :as new-state} (accumulate-state state)]
+                   (om/transact! this `[(app/elapsed {:elapsed ~elapsed})])
+                   (when (moles/one-second-mark? elapsed)
+                     (println "One sec mark")
+                     (om/transact! this `[(app/bg-colour-change {:seconds-elapsed ~(/ elapsed moles/fps)}) [:plan/by-id 1]]))
                    (om/update-state! this assoc :molecule-particles molecule-particles)
-                   (println "IN LOCAL STATE: " (count molecule-particles) "at" elapsed)
+                   ;(println "IN LOCAL STATE: " (count molecule-particles) "at" elapsed)
                    (recur new-state))))))
   (componentWillUnmount [this]
     (om/update-state! this dissoc :molecule-particles))
   (render [this]
     (let [particles (om/get-state this :molecule-particles)
-          _ (println "In render with " (count particles))]
+          ;_ (println "In render with " (count particles))
+          ]
       (dom/svg #js{:className "back" :height (str moles/height "px") :width (str moles/width "px")}
                (dom/g nil
                       (map rect-comp particles))))))
@@ -97,49 +90,25 @@
 ;; A Javascript converter, so what has to come in is the Markdown itself
 ;;
 (defui ^:once ShowdownPlan
-  static uc/InitialAppState
-  (initial-state [clz {:keys [id markdown]}] {:id id :markdown markdown})
+  ;static uc/InitialAppState
+  ;(initial-state [clz {:keys [id markdown]}] {:id id :markdown markdown})
   static om/IQuery
-  (query [this] [:id :markdown])
+  (query [this] [:id :markdown :html-text {:elapsed-join (om/get-query Molecules)} :red :green :blue])
   static om/Ident
   (ident [this {:keys [id]}] [:plan/by-id id])
   Object
   (render [this]
-    (let [{:keys [id markdown]} (om/props this)
-          _ (println (str "MD size: " (count markdown)))
+    (let [{:keys [id html-text elapsed-join red green blue]} (om/props this)
+          _ (println (str "r g b: ==" red ", " green ", " blue "=="))
           ;; This s/make bg transparent:
           ; background-color:rgba(255,0,0,0.5);
-          ;; Need to convert here:
-          text (convert-to-html markdown)
-          ;_ (println (str "HTML: " text))
           ]
       (dom/div #js{:className "container"}
-               (ui-molecules)
-               (dom/div #js{:className "front" :style #js{:backgroundColor "rgba(255,255,255,0.3)"}}
-                        (dom/div #js {:dangerouslySetInnerHTML #js {:__html text}} nil))))))
+               (ui-molecules elapsed-join)
+               (dom/div #js{:className "front" :style #js{:backgroundColor "rgba(200,200,200,0.3)"}}
+                        (dom/div #js{:className "inner-front"}
+                                 (dom/div #js {:dangerouslySetInnerHTML #js {:__html html-text}} nil)))))))
 (def ui-showdown-plan (om/factory ShowdownPlan {:keyfn :id}))
-
-(defui ^:once MyList
-  static uc/InitialAppState
-  (initial-state [clz params] {:title             "Initial List"
-                               :ui/new-item-label ""
-                               :items             []})
-  static om/IQuery
-  (query [this] [:ui/new-item-label :title {:items (om/get-query Item)}])
-  static om/Ident
-  (ident [this {:keys [title]}] [:lists/by-title title])
-  Object
-  (render [this]
-    (let [{:keys [title items ui/new-item-label] :or {ui/new-item-label ""}} (om/props this)
-          _ (println "Count items: " (count items))]
-      (dom/div nil
-               (dom/h4 nil title)
-               (dom/input #js {:value    new-item-label
-                               :onChange (fn [evt] (m/set-string! this :ui/new-item-label :event evt))})
-               (dom/button #js {:onClick #(om/transact! this `[(app/add-item {:label ~new-item-label})])} "+")
-               (dom/ul nil
-                       (map ui-item items))))))
-(def ui-list (om/factory MyList))
 
 (defui ^:once Root
   static uc/InitialAppState

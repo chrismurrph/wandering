@@ -77,6 +77,8 @@
 
 (def fps 11)
 (def wait-time (/ 1000 fps))
+(defn one-second-mark? [elapsed]
+  (zero? (rem elapsed fps)))
 (def gray-saturation 30)                                         ; 200 is normal
 (def gray-colour [245,245,220])
 (def centre-pos [(/ width 2) (/ height 2)])

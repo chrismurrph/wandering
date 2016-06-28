@@ -1,6 +1,7 @@
 (ns app.core
   (:require
     app.mutations
+    cljsjs.showdown
     [untangled.client.data-fetch :as df]
     [untangled.client.core :as uc]
     [om.next :as om]
