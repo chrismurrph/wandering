@@ -8,12 +8,16 @@
   (.sin js/Math x))
 
 ;; subtly changes the background colour in a way the user won't consciously notice
-(defn pulse [seconds-elapsed low high rate]
+(defn- pulse [seconds-elapsed low high rate]
   (let [diff (- high low)
         half (/ diff 2)
         mid (+ low half)
         x (sin (* seconds-elapsed (/ 1.0 rate)))]
-    (+ mid (* x half))))
+    (int (+ mid (* x half)))))
+
+(defn red-pulse [seconds-elapsed] (pulse seconds-elapsed 200 220 15.0))
+(defn green-pulse [seconds-elapsed] (pulse seconds-elapsed 220 240 40.0))
+(defn blue-pulse [seconds-elapsed] (pulse seconds-elapsed 240 255 5.0))
 
 (defmethod m/mutate 'app/elapsed
   [{:keys [state]} _ {:keys [elapsed]}]
@@ -28,9 +32,9 @@
              (swap! state (fn [st]
                             ;(println "elapsed: " seconds-elapsed)
                             (-> st
-                                (assoc-in [:plan/by-id 1 :red] (pulse seconds-elapsed 200 220 15.0))
-                                (assoc-in [:plan/by-id 1 :green] (pulse seconds-elapsed 220 240 40.0))
-                                (assoc-in [:plan/by-id 1 :blue] (pulse seconds-elapsed 240 255 5.0))))))})
+                                (assoc-in [:plan/by-id 1 :red] (red-pulse seconds-elapsed))
+                                (assoc-in [:plan/by-id 1 :green] (green-pulse seconds-elapsed))
+                                (assoc-in [:plan/by-id 1 :blue] (blue-pulse seconds-elapsed))))))})
 
 (defn convert-to-html [markdown]
   ;; note the syntax below: js/VarFromExternsFile.property
@@ -48,8 +52,8 @@
   [{:keys [state]} _ _]
   {:action (fn []
              (let [idents (get @state :imported-plans)
-                   _ (println "Loading items post mutation targetting " idents)
                    markdown (get-in @state [:plan/by-id 1 :markdown])
+                   _ (println "markdown: " markdown)
                    ;; Need to convert here:
                    text (convert-to-html markdown)
                    ;_ (println (str "HTML: " text))

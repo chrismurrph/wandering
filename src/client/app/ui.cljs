@@ -99,13 +99,15 @@
   Object
   (render [this]
     (let [{:keys [id html-text elapsed-join red green blue]} (om/props this)
-          _ (println (str "r g b: ==" red ", " green ", " blue "=="))
+          _ (println (str "r g b: ==" red "," green "," blue "=="))
+          ;; Doesn't work, whereas: "rgba(200,200,200,0.3)" does!
+          bg-colour (str "rgba(" red "," green "," blue ",0.3)")
           ;; This s/make bg transparent:
           ; background-color:rgba(255,0,0,0.5);
           ]
       (dom/div #js{:className "container"}
                (ui-molecules elapsed-join)
-               (dom/div #js{:className "front" :style #js{:backgroundColor "rgba(200,200,200,0.3)"}}
+               (dom/div #js{:className "front" :style #js{:backgroundColor bg-colour}}
                         (dom/div #js{:className "inner-front"}
                                  (dom/div #js {:dangerouslySetInnerHTML #js {:__html html-text}} nil)))))))
 (def ui-showdown-plan (om/factory ShowdownPlan {:keyfn :id}))
