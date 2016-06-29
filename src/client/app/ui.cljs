@@ -3,25 +3,25 @@
             [om.next :as om :refer-macros [defui]]
             yahoo.intl-messageformat-with-locales
             [untangled.client.core :as uc]
-            [untangled.client.mutations :as m]
-            [reagent.core :as r]
             [app.molecules :as moles]
-            [app.utils :as u]
-            [cljs.core.async :as async
+            [cljs.core.async
              :refer [<! >! chan close! put! timeout]])
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
 (defui Rect
   Object
   (render [this]
-    (let [{:keys [x y mole-fill]} (om/props this)
+    (let [{:keys [x y mole-fill degrees-angle]} (om/props this)
           [r g b] mole-fill
           rect-props {:x       x
                       :y       y
                       :width   30
                       :height  40
                       :opacity 0.1
+                      ;; Harder to see than not having
                       :fill    (str "rgb(" r "," g "," b ")")
+                      ;; Without x and y they don't start off in the hatchery area. i.e. x and y not respected
+                      :transform (str "rotate(" degrees-angle "," x "," y ")")
                       :rx      5
                       :ry      5}]
       (dom/rect (clj->js rect-props)))))

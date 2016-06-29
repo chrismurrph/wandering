@@ -77,13 +77,13 @@
 (def wait-time (/ 1000 fps))
 (defn one-second-mark? [elapsed]
   (zero? (rem elapsed fps)))
-(def gray-saturation 30)                                         ; 200 is normal
-(def gray-colour [245,245,220])
+(def gray-saturation 30)                                    ; 200 is normal
+(def gray-colour [245, 245, 220])
 (def centre-pos [(/ width 2) (/ height 2)])
-(def dark-blue [0,0,139])
-(def yellow [255,255,0])
-(def black [0,0,0])
-(def red [255,0,0])
+(def dark-blue [0, 0, 139])
+(def yellow [255, 255, 0])
+(def black [0, 0, 0])
+(def red [255, 0, 0])
 
 (defn move-molecule-symbol [molecule-symbol]
   (let [{:keys [x y dir]} molecule-symbol
@@ -123,16 +123,16 @@
         y (+ (y-val centre-pos) y-random)
         pick (random-pick)
         stand-out (mu/chance-one-in 10)]
-    {:id (gensym)
-     :x x
-     :y y
-     :dir dir
+    {:id             (gensym)
+     :x              x
+     :y              y
+     :dir            dir
      :max-saturation (if stand-out (:max-saturation pick) gray-saturation)
-     :z (if stand-out 1.0 0.1)
-     :mole-fill (if stand-out (:colour pick) gray-colour)
-     :symbol-txt (:text pick)
-     :speed 0.25
-     :angle (mu/random-angle)}))
+     :z              (if stand-out 1.0 0.1)
+     :mole-fill      (if stand-out (:colour pick) gray-colour)
+     :symbol-txt     (:text pick)
+     :speed          0.25
+     :degrees-angle  (int (mu/radians->degrees (mu/random-angle)))}))
 
 (defn emit-molecule-particles [state]
   (let [num-particles (count (:molecule-particles state))]

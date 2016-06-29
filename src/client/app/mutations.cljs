@@ -1,9 +1,6 @@
 (ns app.mutations
   (:require [untangled.client.mutations :as m]
-            [untangled.client.core :as uc]
-            [app.ui :as ui]
-            [app.molecules :as moles]
-            [om.next :as om]))
+            [app.molecules :as moles]))
 
 (defmethod m/mutate 'app/elapsed
   [{:keys [state]} _ {:keys [elapsed]}]

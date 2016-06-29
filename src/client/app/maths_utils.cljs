@@ -25,6 +25,13 @@
   [(* constant (. js/Math (cos angle)))
    (* constant (. js/Math (sin angle)))])
 
+(comment (defn radians->degrees [radians]
+           (* radians 57.2958)))
+
+;; degrees = radians * (180/pi)
+(defn radians->degrees [radians]
+  (* radians (/ 180 js/Math.PI)))
+
 (defn chance-one-in
   "If you gave 100 as the argument then there would be a 1% chance of getting true, and 99% chance of getting false"
   [n]
