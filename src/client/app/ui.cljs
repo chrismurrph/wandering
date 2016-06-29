@@ -11,63 +11,40 @@
              :refer [<! >! chan close! put! timeout]])
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
-(defui ^:once Item
-  static uc/InitialAppState
-  (initial-state [clz {:keys [id label]}] {:id id :label label})
-  static om/IQuery
-  (query [this] [:id :label])
-  static om/Ident
-  (ident [this {:keys [id]}] [:items/by-id id])
-  Object
-  (render [this]
-    (let [{:keys [id label]} (om/props this)]
-      (dom/li nil label))))
-(def ui-item (om/factory Item {:keyfn :id}))
-
 (defui Rect
   Object
   (render [this]
-    (let [{:keys [x y]} (om/props this)
+    (let [{:keys [x y mole-fill]} (om/props this)
+          [r g b] mole-fill
           rect-props {:x       x
                       :y       y
                       :width   30
                       :height  40
                       :opacity 0.1
-                      ;:fill    fill
-                      :rx      5 :ry 5}]
+                      :fill    (str "rgb(" r "," g "," b ")")
+                      :rx      5
+                      :ry      5}]
       (dom/rect (clj->js rect-props)))))
 (def rect-comp (om/factory Rect {:keyfn :id}))
 
-(defn accumulate-state [state]
-  (let [res (as-> state $
-                  (update $ :elapsed #(inc %))
-                  (moles/emit-molecule-particles $)
-                  (update $ :molecule-particles #(map moles/move-molecule-symbol %))
-                  ;(u/probe "state" $)
-                  )
-        ;_ (moles/draw-state res)
-        ]
-    res))
-
-(def test-molecules [{:id 1 :x 10 :y 10}
-                     {:id 2 :x 20 :y 20}
-                     {:id 3 :x 50 :y 50}
-                     {:id 4 :x 60 :y 100}
-                     {:id 5 :x 70 :y 220}
-                     {:id 6 :x 80 :y 340}])
+(defn emit-move-molecules [state]
+  (as-> state $
+        (update $ :elapsed #(inc %))
+        (moles/emit-molecule-particles $)
+        (update $ :molecule-particles #(map moles/move-molecule-symbol %))
+        ;(u/probe "state" $)
+        ))
 
 (defui ^once Molecules
   static om/IQuery
   (query [this] [:elapsed])
   Object
-  (initLocalState [this]
-    {:molecule-particles test-molecules})
   (componentDidMount [this]
     (let []
       (go-loop [state {:elapsed 0 :molecule-particles []}]
                (<! (timeout moles/wait-time))
                (when (< (:elapsed state) 3000)
-                 (let [{:keys [molecule-particles elapsed] :as new-state} (accumulate-state state)]
+                 (let [{:keys [molecule-particles elapsed] :as new-state} (emit-move-molecules state)]
                    (om/transact! this `[(app/elapsed {:elapsed ~elapsed})])
                    (when (moles/one-second-mark? elapsed)
                      (println "One sec mark")
@@ -86,12 +63,7 @@
                       (map rect-comp particles))))))
 (def ui-molecules (om/factory Molecules {:keyfn :id}))
 
-;;
-;; A Javascript converter, so what has to come in is the Markdown itself
-;;
 (defui ^:once ShowdownPlan
-  ;static uc/InitialAppState
-  ;(initial-state [clz {:keys [id markdown]}] {:id id :markdown markdown})
   static om/IQuery
   (query [this] [:id :markdown :html-text {:elapsed-join (om/get-query Molecules)} :red :green :blue])
   static om/Ident
@@ -99,6 +71,9 @@
   Object
   (render [this]
     (let [{:keys [id html-text elapsed-join red green blue]} (om/props this)
+          red (or red (moles/red-pulse 1))
+          green (or green (moles/green-pulse 1))
+          blue (or blue (moles/blue-pulse 1))
           _ (println (str "r g b: ==" red "," green "," blue "=="))
           ;; Doesn't work, whereas: "rgba(200,200,200,0.3)" does!
           bg-colour (str "rgba(" red "," green "," blue ",0.3)")

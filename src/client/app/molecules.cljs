@@ -2,6 +2,21 @@
   (:require [app.maths-utils :as mu]
             [om.dom :as dom]))
 
+(defn sin [x]
+  (.sin js/Math x))
+
+;; subtly changes the background colour in a way the user won't consciously notice
+(defn- pulse [seconds-elapsed low high rate]
+  (let [diff (- high low)
+        half (/ diff 2)
+        mid (+ low half)
+        x (sin (* seconds-elapsed (/ 1.0 rate)))]
+    (int (+ mid (* x half)))))
+
+(defn red-pulse [seconds-elapsed] (pulse seconds-elapsed 200 220 15.0))
+(defn green-pulse [seconds-elapsed] (pulse seconds-elapsed 220 240 40.0))
+(defn blue-pulse [seconds-elapsed] (pulse seconds-elapsed 240 255 5.0))
+
 (def diameter 30)
 
 ;;
@@ -30,7 +45,7 @@
     molecule-symbol))
 
 (defn render-molecule-symbol [molecule-symbol]
-  (let [[r g b] (:col molecule-symbol)
+  (let [[r g b] (:mole-fill molecule-symbol)
         saturation (calc-distance-saturation molecule-symbol)]
     ;(q/fill r g b saturation)
     ;(q/text (:symbol-txt molecule-symbol) 0 0)
@@ -49,23 +64,6 @@
       (render-molecule-symbol entity)
       ;(q/pop-matrix)
       )))
-
-(defn pulse [low high rate]
-  (let [diff (- high low)
-        half (/ diff 2)
-        mid (+ low half)
-        ;s (/ (q/millis) 1000.0)
-        ;x (q/sin (* s (/ 1.0 rate)))
-        x -1 ; silly number
-        ]
-    (+ mid (* x half))))
-
-; I don't really understand what this. However it is good because it subtly changes
-; the background colour in a way the user won't consciously notice
-(defn current-bg-colour []
-  (pulse 200 220 15.0)
-  (pulse 220 240 40.0)
-  (pulse 240 255  5.0))
 
 (defn draw-state [state]
   ;(u/log "In draw-state")
@@ -131,7 +129,7 @@
      :dir dir
      :max-saturation (if stand-out (:max-saturation pick) gray-saturation)
      :z (if stand-out 1.0 0.1)
-     :col (if stand-out (:colour pick) gray-colour)
+     :mole-fill (if stand-out (:colour pick) gray-colour)
      :symbol-txt (:text pick)
      :speed 0.25
      :angle (mu/random-angle)}))

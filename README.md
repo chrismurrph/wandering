@@ -1,6 +1,6 @@
-Getting Started Tutorial 
-------------------------
+Wandering - small project based on Untangled's 'Getting Started'
+----------------------------------------------------------------
 
-These are the support files for the Untangled Web Framework's 
-getting started tutorial. See the video for instructions.
+This project presents some text as html that was originally in a markdown file on your server.
+It presents the text on a password controlled site, and has some SVG animation.
 

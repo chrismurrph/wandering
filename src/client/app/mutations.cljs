@@ -2,22 +2,8 @@
   (:require [untangled.client.mutations :as m]
             [untangled.client.core :as uc]
             [app.ui :as ui]
+            [app.molecules :as moles]
             [om.next :as om]))
-
-(defn sin [x]
-  (.sin js/Math x))
-
-;; subtly changes the background colour in a way the user won't consciously notice
-(defn- pulse [seconds-elapsed low high rate]
-  (let [diff (- high low)
-        half (/ diff 2)
-        mid (+ low half)
-        x (sin (* seconds-elapsed (/ 1.0 rate)))]
-    (int (+ mid (* x half)))))
-
-(defn red-pulse [seconds-elapsed] (pulse seconds-elapsed 200 220 15.0))
-(defn green-pulse [seconds-elapsed] (pulse seconds-elapsed 220 240 40.0))
-(defn blue-pulse [seconds-elapsed] (pulse seconds-elapsed 240 255 5.0))
 
 (defmethod m/mutate 'app/elapsed
   [{:keys [state]} _ {:keys [elapsed]}]
@@ -32,9 +18,9 @@
              (swap! state (fn [st]
                             ;(println "elapsed: " seconds-elapsed)
                             (-> st
-                                (assoc-in [:plan/by-id 1 :red] (red-pulse seconds-elapsed))
-                                (assoc-in [:plan/by-id 1 :green] (green-pulse seconds-elapsed))
-                                (assoc-in [:plan/by-id 1 :blue] (blue-pulse seconds-elapsed))))))})
+                                (assoc-in [:plan/by-id 1 :red] (moles/red-pulse seconds-elapsed))
+                                (assoc-in [:plan/by-id 1 :green] (moles/green-pulse seconds-elapsed))
+                                (assoc-in [:plan/by-id 1 :blue] (moles/blue-pulse seconds-elapsed))))))})
 
 (defn convert-to-html [markdown]
   ;; note the syntax below: js/VarFromExternsFile.property
