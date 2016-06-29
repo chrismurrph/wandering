@@ -34,9 +34,9 @@
   (timbre/info "Query: " (op/ast->expr ast))
   (api/api-read env k params))
 
-(defn make-system []
+(defn make-system [app-config-path]
   (core/make-untangled-server
-    :config-path "config/wandering.edn"
+    :config-path app-config-path
     :parser (om/parser {:read logging-query :mutate logging-mutate})
     :parser-injections #{:markdown}
     :components {:markdown (build-markdown-reader)}))
