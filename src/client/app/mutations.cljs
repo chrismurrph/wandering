@@ -23,10 +23,9 @@
   ;; note the syntax below: js/VarFromExternsFile.property
   ;; the dot on the end is the usual Clojure interop syntax: (Constructor. constructor-arg constructor-arg)
   ;; #js {:tables true}
-  (let [converter (js/Showdown.converter.)
-        ;_ converter.setOption('optionKey', 'value');
+  (let [converter (js/Showdown.converter. #js {:tables true})
         ;; Apparently this function doesn't even exist
-        ;_ (.setOption converter "tables" true)
+        ;; _ (.setOption converter "tables" true)
         ]
     ;; methods you call will generally need to be called out as prototype values in the externs
     (.makeHtml converter markdown)))
@@ -36,8 +35,7 @@
   {:action (fn []
              (let [idents (get @state :imported-plans)
                    markdown (get-in @state [:plan/by-id 1 :markdown])
-                   _ (println "markdown: " markdown)
-                   ;; Need to convert here:
+                   ;_ (println "markdown: " markdown)
                    text (convert-to-html markdown)
                    ;_ (println (str "HTML: " text))
                    ]

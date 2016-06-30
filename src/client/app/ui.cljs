@@ -8,20 +8,64 @@
              :refer [<! >! chan close! put! timeout]])
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
+;;
+;; I'm trying three ways to get the text displaying and none of them are working
+;;
+(defui Molecule
+  Object
+  (render [this]
+    (let [{:keys [x y mole-fill last-degrees-angle symbol-txt max-saturation]} (om/props this)
+          _ (println symbol-txt)
+          [r g b] mole-fill
+          saturation (moles/calc-distance-saturation {:x x :y y :max-saturation max-saturation})
+          svg-props {:value     symbol-txt
+                     :text      symbol-txt
+                     :x         x
+                     :y         y
+                     :width     30
+                     :height    40
+                     :opacity   0.1
+                     :stroke    "#00ff00"
+                     ;; Harder to see than not having
+                     :fill    (str "rgba(" r "," g "," b "," saturation ")")
+                     ;; Without x and y they don't start off in the hatchery area. i.e. x and y not respected
+                     :transform (str "rotate(" last-degrees-angle "," x "," y ")")
+                     ;:rx        5
+                     ;:ry        5
+                     :dx        20
+                     :dy        20
+                     :font-family "Verdana"
+                     :font-size 55
+                     :text-length 100
+                     }]
+      (dom/text (clj->js svg-props) symbol-txt))))
+(def molecule-comp (om/factory Molecule {:keyfn :id}))
+
+;
+; plain React component
+;
+(def rect-width 30)
+(def rect-height 40)
 (defui Rect
   Object
   (render [this]
-    (let [{:keys [x y mole-fill degrees-angle]} (om/props this)
+    (let [{:keys [id x y mole-fill last-degrees-angle max-saturation]} (om/props this)
+          saturation (moles/calc-distance-saturation {:x x :y y :max-saturation max-saturation})
+          centre-x (+ x (/ rect-width 2))
+          centre-y (+ y (/ rect-height 2))
+          ;_ (println id)
+          _ (when (= (str id) "G__1")
+              (println "Sat: " id saturation))
           [r g b] mole-fill
           rect-props {:x       x
                       :y       y
-                      :width   30
-                      :height  40
-                      :opacity 0.1
+                      :width   rect-width
+                      :height  rect-height
+                      :opacity 0.2
                       ;; Harder to see than not having
-                      :fill    (str "rgb(" r "," g "," b ")")
+                      :fill    (str "rgba(" r "," g "," b "," saturation ")")
                       ;; Without x and y they don't start off in the hatchery area. i.e. x and y not respected
-                      :transform (str "rotate(" degrees-angle "," x "," y ")")
+                      :transform (str "rotate(" last-degrees-angle "," centre-x "," centre-y ")")
                       :rx      5
                       :ry      5}]
       (dom/rect (clj->js rect-props)))))
@@ -46,8 +90,7 @@
                (when (< (:elapsed state) 3000)
                  (let [{:keys [molecule-particles elapsed] :as new-state} (emit-move-molecules state)]
                    (om/transact! this `[(app/elapsed {:elapsed ~elapsed})])
-                   (when (moles/one-second-mark? elapsed)
-                     (println "One sec mark")
+                   (when (moles/ten-second-mark? elapsed)
                      (om/transact! this `[(app/bg-colour-change {:seconds-elapsed ~(/ elapsed moles/fps)}) [:plan/by-id 1]]))
                    (om/update-state! this assoc :molecule-particles molecule-particles)
                    ;(println "IN LOCAL STATE: " (count molecule-particles) "at" elapsed)
@@ -58,7 +101,10 @@
     (let [particles (om/get-state this :molecule-particles)
           ;_ (println "In render with " (count particles))
           ]
-      (dom/svg #js{:className "back" :height (str moles/height "px") :width (str moles/width "px")}
+      (dom/svg #js{:className "back"
+                   :opacity   "0.85"
+                   :height    (str moles/height "px")
+                   :width     (str moles/width "px")}
                (dom/g nil
                       (map rect-comp particles))))))
 (def ui-molecules (om/factory Molecules {:keyfn :id}))
@@ -75,12 +121,12 @@
           green (or green (moles/green-pulse 1))
           blue (or blue (moles/blue-pulse 1))
           _ (println (str "r g b: ==" red "," green "," blue "=="))
-          ;; Doesn't work, whereas: "rgba(200,200,200,0.3)" does!
           bg-colour (str "rgba(" red "," green "," blue ",0.3)")
           ;; This s/make bg transparent:
           ; background-color:rgba(255,0,0,0.5);
           ]
-      (dom/div #js{:className "container"}
+      (dom/div #js{:className "container" :style #js{:width  (str moles/width "px")
+                                                     :height (str moles/height "px")}}
                (ui-molecules elapsed-join)
                (dom/div #js{:className "front" :style #js{:backgroundColor bg-colour}}
                         (dom/div #js{:className "inner-front"}
@@ -98,6 +144,6 @@
           _ (println "list in size: " (count (:markdown (first plans))))
           ]
       (dom/div #js{:key react-key}
-               (dom/h4 nil "Header")
-               (dom/div nil
+               ;(dom/h4 nil "Header")
+               (dom/div #js{:className "outer-body"}
                         (map ui-showdown-plan plans))))))

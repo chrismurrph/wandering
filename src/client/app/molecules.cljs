@@ -1,6 +1,5 @@
 (ns app.molecules
-  (:require [app.maths-utils :as mu]
-            [om.dom :as dom]))
+  (:require [app.maths-utils :as mu]))
 
 (defn sin [x]
   (.sin js/Math x))
@@ -17,66 +16,27 @@
 (defn green-pulse [seconds-elapsed] (pulse seconds-elapsed 220 240 40.0))
 (defn blue-pulse [seconds-elapsed] (pulse seconds-elapsed 240 255 5.0))
 
-(def diameter 30)
-
-;;
-;; Use a minus number for margin if you want symbols to disappear while still on the screen
-;;
-(defn on-screen? [x y width height]
-  (let [margin diameter
-        res (and (<= (- margin) x (+ margin width))
-                 (<= (- margin) y (+ margin height)))]
-    ;(when-not res (u/log "Going off the screen"))
-    res))
-
-(def width 755)
+(def width 955)
 (def height 3000)
 (def centre-distance (/ height 2))
 
+;;
+;; Becomes brighter the further are away. Each type of molecule has a different starting saturation.
+;;
 (defn calc-distance-saturation
   [entity]
   (let [{:keys [x y max-saturation]} entity
+        _ (assert (and x y max-saturation))
         edge-distance (mu/closest-edge-distance x y width height)
         brightness (/ (- centre-distance edge-distance) centre-distance)]
     (* brightness max-saturation)))
-
-(defn conv->svg [molecule-symbol]
-  (let [_ (println molecule-symbol)]
-    molecule-symbol))
-
-(defn render-molecule-symbol [molecule-symbol]
-  (let [[r g b] (:mole-fill molecule-symbol)
-        saturation (calc-distance-saturation molecule-symbol)]
-    ;(q/fill r g b saturation)
-    ;(q/text (:symbol-txt molecule-symbol) 0 0)
-    (dom/rect (clj->js (conv->svg molecule-symbol)))
-    ))
-
-(defn draw-entity [entity]
-  (let [{:keys [x y angle]} entity
-        ;z (:z entity)
-        screen-x x
-        screen-y y]
-    (when (on-screen? screen-x screen-y 20 20)
-      ;(q/push-matrix)
-      ;(q/translate screen-x screen-y)
-      ;(q/rotate angle)
-      (render-molecule-symbol entity)
-      ;(q/pop-matrix)
-      )))
-
-(defn draw-state [state]
-  ;(u/log "In draw-state")
-  ;(q/background (current-bg-colour))
-  ;(q/no-stroke)
-  ;(u/log "molecule-particles count " (count (:molecule-particles state)))
-  (doseq [molecule (:molecule-particles state)]
-    (draw-entity molecule)))
 
 (def fps 11)
 (def wait-time (/ 1000 fps))
 (defn one-second-mark? [elapsed]
   (zero? (rem elapsed fps)))
+(defn ten-second-mark? [elapsed]
+  (zero? (rem elapsed (* 10 fps))))
 (def gray-saturation 30)                                    ; 200 is normal
 (def gray-colour [245, 245, 220])
 (def centre-pos [(/ width 2) (/ height 2)])
@@ -85,12 +45,15 @@
 (def black [0, 0, 0])
 (def red [255, 0, 0])
 
+;;
+;; Mutation of local state
+;;
 (defn move-molecule-symbol [molecule-symbol]
-  (let [{:keys [x y dir]} molecule-symbol
+  (let [{:keys [x y dir last-degrees-angle change-by-degrees-angle]} molecule-symbol
         [delta-x delta-y] (mu/radians->vector dir 1)
         [new-x new-y] (mu/translate-v2 [x y] [delta-x delta-y])]
-    ;(u/log new-x) (u/log new-y)
-    (assoc molecule-symbol :x new-x :y new-y)))
+    (-> molecule-symbol
+        (assoc :x new-x :y new-y :last-degrees-angle (+ last-degrees-angle change-by-degrees-angle)))))
 
 ;; CO2 dark blue, CO yellow, O2 black, CH4 red
 (def gas-infos [
@@ -105,8 +68,6 @@
     ;(u/log "Got " colour-idx)
     (get gas-infos idx)))
 
-;; Future enhancement is for right at start there to be much bigger hatchery area and many more created
-;; This way user won't be distracted by seeing them spread to the outside
 (def hatchery-area-size 20)
 (defn x-val [vec] (first vec))
 (defn y-val [vec] (second vec))
@@ -123,16 +84,19 @@
         y (+ (y-val centre-pos) y-random)
         pick (random-pick)
         stand-out (mu/chance-one-in 10)]
-    {:id             (gensym)
-     :x              x
-     :y              y
-     :dir            dir
-     :max-saturation (if stand-out (:max-saturation pick) gray-saturation)
-     :z              (if stand-out 1.0 0.1)
-     :mole-fill      (if stand-out (:colour pick) gray-colour)
-     :symbol-txt     (:text pick)
-     :speed          0.25
-     :degrees-angle  (int (mu/radians->degrees (mu/random-angle)))}))
+    {:id                      (gensym)
+     :x                       x
+     :y                       y
+     :dir                     dir
+     :max-saturation          (if stand-out (:max-saturation pick) gray-saturation)
+     :z                       (if stand-out 1.0 0.1)
+     :mole-fill               (if stand-out (:colour pick) gray-colour)
+     :symbol-txt              (:text pick)
+     :speed                   0.25
+     :start-degrees-angle     (int (mu/radians->degrees (mu/random-angle)))
+     ;:change-by-degrees-angle (- (rand-int 7) 3)
+     :change-by-degrees-angle (- (mu/random-float 0 1) 0.5)
+     }))
 
 (defn emit-molecule-particles [state]
   (let [num-particles (count (:molecule-particles state))]

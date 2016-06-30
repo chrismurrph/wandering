@@ -25,10 +25,6 @@
   [(* constant (. js/Math (cos angle)))
    (* constant (. js/Math (sin angle)))])
 
-(comment (defn radians->degrees [radians]
-           (* radians 57.2958)))
-
-;; degrees = radians * (180/pi)
 (defn radians->degrees [radians]
   (* radians (/ 180 js/Math.PI)))
 
@@ -51,9 +47,9 @@
 (defn random-ints
   [sample-size pop-size]
   (let [res (set (take sample-size (repeatedly #(rand-int pop-size))))
-        diff (- sample-size (count res))]
-    (if (> diff 0)
-      (set (concat res (random-ints diff pop-size)))
+        short-by (- sample-size (count res))]
+    (if (> short-by 0)
+      (set (concat res (random-ints short-by pop-size)))
       res)))
 
 (defn random-floats
@@ -67,10 +63,6 @@
      (if (> missing 0)
        (set (concat res (random-floats missing)))
        res))))
-
-;(defn random-float
-;  [lowest highest]
-;  first (random-floats 1 lowest highest))
 
 (defn random-float [low high]
   (let [diff (- high low)]

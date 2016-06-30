@@ -17,10 +17,11 @@
                  [endophile "0.1.2"]
                  [reagent "0.6.0-rc"]
                  [markdown-clj "0.9.89"]
-                 [cljsjs/showdown "0.4.0-1"]
+                 [cljsjs/showdown "1.4.2-0"]
                  [org.clojure/core.async "0.2.374"]]
 
-  :plugins [[lein-cljsbuild "1.1.3"]]
+  :plugins [[lein-cljsbuild "1.1.3"]
+            [lein-less "1.7.5"]]
 
   :source-paths ["dev/server" "src/server"]
   :test-paths ["test/client"]
@@ -49,5 +50,8 @@
                                :asset-path           "js/compiled/specs"
                                :recompile-dependents true
                                :optimizations        :none}}]}
+
+  :less {:source-paths ["less/app.main.less"]
+         :target-path  "resources/public/css/app.css"}
 
   :repl-options {:init-ns user})
