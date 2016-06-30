@@ -1,5 +1,6 @@
 (ns app.mutations
-  (:require [untangled.client.mutations :as m]
+  (:require [cljsjs.showdown]
+            [untangled.client.mutations :as m]
             [app.molecules :as moles]))
 
 (defmethod m/mutate 'app/elapsed
@@ -23,9 +24,9 @@
   ;; note the syntax below: js/VarFromExternsFile.property
   ;; the dot on the end is the usual Clojure interop syntax: (Constructor. constructor-arg constructor-arg)
   ;; #js {:tables true}
-  (let [converter (js/Showdown.converter. #js {:tables true})
+  (let [converter (js/Showdown.converter.)                  ;;#js {:tables true}
         ;; Apparently this function doesn't even exist
-        ;; _ (.setOption converter "tables" true)
+        _ (.setOption converter "tables" true)
         ]
     ;; methods you call will generally need to be called out as prototype values in the externs
     (.makeHtml converter markdown)))

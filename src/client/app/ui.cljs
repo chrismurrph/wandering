@@ -8,6 +8,11 @@
              :refer [<! >! chan close! put! timeout]])
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
+;
+; plain React components. Molecule prefered alternative
+;
+(def side-length 50)
+
 ;;
 ;; I'm trying three ways to get the text displaying and none of them are working
 ;;
@@ -15,59 +20,47 @@
   Object
   (render [this]
     (let [{:keys [x y mole-fill last-degrees-angle symbol-txt max-saturation]} (om/props this)
-          _ (println symbol-txt)
           [r g b] mole-fill
           saturation (moles/calc-distance-saturation {:x x :y y :max-saturation max-saturation})
-          svg-props {:value     symbol-txt
-                     :text      symbol-txt
-                     :x         x
-                     :y         y
-                     :width     30
-                     :height    40
-                     :opacity   0.1
-                     :stroke    "#00ff00"
-                     ;; Harder to see than not having
-                     :fill    (str "rgba(" r "," g "," b "," saturation ")")
+          centre-x (+ x (/ side-length 2))
+          centre-y (+ y (/ side-length 2))
+          svg-props {:x           x
+                     :y           y
+                     :stroke      (str "rgba(" r "," g "," b "," saturation ")")
+                     :fill        (str "rgba(" r "," g "," b "," saturation ")")
+                     :stroke-with 10
                      ;; Without x and y they don't start off in the hatchery area. i.e. x and y not respected
-                     :transform (str "rotate(" last-degrees-angle "," x "," y ")")
-                     ;:rx        5
-                     ;:ry        5
-                     :dx        20
-                     :dy        20
+                     :transform   (str "rotate(" last-degrees-angle "," centre-x "," centre-y ")")
+                     :dx          side-length
+                     :dy          side-length
                      :font-family "Verdana"
-                     :font-size 55
-                     :text-length 100
+                     :font-size   55
+                     ;:text-length 100
                      }]
       (dom/text (clj->js svg-props) symbol-txt))))
 (def molecule-comp (om/factory Molecule {:keyfn :id}))
 
-;
-; plain React component
-;
-(def rect-width 30)
-(def rect-height 40)
 (defui Rect
   Object
   (render [this]
     (let [{:keys [id x y mole-fill last-degrees-angle max-saturation]} (om/props this)
           saturation (moles/calc-distance-saturation {:x x :y y :max-saturation max-saturation})
-          centre-x (+ x (/ rect-width 2))
-          centre-y (+ y (/ rect-height 2))
-          ;_ (println id)
+          centre-x (+ x (/ side-length 2))
+          centre-y (+ y (/ side-length 2))
           _ (when (= (str id) "G__1")
               (println "Sat: " id saturation))
           [r g b] mole-fill
-          rect-props {:x       x
-                      :y       y
-                      :width   rect-width
-                      :height  rect-height
-                      :opacity 0.2
+          rect-props {:x         x
+                      :y         y
+                      :width     side-length
+                      :height    side-length
+                      :opacity   0.2
                       ;; Harder to see than not having
-                      :fill    (str "rgba(" r "," g "," b "," saturation ")")
+                      :fill      (str "rgba(" r "," g "," b "," saturation ")")
                       ;; Without x and y they don't start off in the hatchery area. i.e. x and y not respected
                       :transform (str "rotate(" last-degrees-angle "," centre-x "," centre-y ")")
-                      :rx      5
-                      :ry      5}]
+                      :rx        5
+                      :ry        5}]
       (dom/rect (clj->js rect-props)))))
 (def rect-comp (om/factory Rect {:keyfn :id}))
 
@@ -106,7 +99,7 @@
                    :height    (str moles/height "px")
                    :width     (str moles/width "px")}
                (dom/g nil
-                      (map rect-comp particles))))))
+                      (map molecule-comp particles))))))
 (def ui-molecules (om/factory Molecules {:keyfn :id}))
 
 (defui ^:once ShowdownPlan
