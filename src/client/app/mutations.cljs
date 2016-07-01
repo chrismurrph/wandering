@@ -24,8 +24,7 @@
   ;; note the syntax below: js/VarFromExternsFile.property
   ;; the dot on the end is the usual Clojure interop syntax: (Constructor. constructor-arg constructor-arg)
   ;; #js {:tables true}
-  (let [converter (js/Showdown.converter.)                  ;;#js {:tables true}
-        ;; Apparently this function doesn't even exist
+  (let [converter (js/showdown.Converter.)                  ;;#js {:tables true}
         _ (.setOption converter "tables" true)
         ]
     ;; methods you call will generally need to be called out as prototype values in the externs
