@@ -32,6 +32,20 @@ body {
 }
 */
 
+table {
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+
+th, td {
+    padding: 15px;
+}
+
+tr:hover {background-color: @pgrayLighter}
+
 .main {
   padding: 2em;
   color: black;
@@ -55,8 +69,15 @@ body {
   text-align: right;
 }
 
+/* apply this to the first h2 */
+.title {
+  text-align: center;
+  background: #EDB;
+}
+
+/* apply this to other headings */
 h2 {
-  /* font: Helvetica, sans-serif; */
+  font: Helvetica, sans-serif;
   text-align: left;
   margin-right: 4px;
   background: #EDB;
@@ -106,7 +127,7 @@ h2 {
   /* height: 2000px; */
   width: 755px;
   background: #eee;
-  margin: 100px auto;
+  margin: 50px auto;
   position: relative;
 }
 
@@ -123,6 +144,11 @@ h2 {
     /* position: absolute; */
 }
 
+.tubes-general-container {
+  margin: 20px auto;
+  position: relative;
+}
+
 .container .back {
     display: block;
     z-index: 3;
@@ -130,9 +156,17 @@ h2 {
     background: @pgrayLightest;
 }
 
+/* Could not get to work
+.centered {
+  background: #222
+  margin: auto;
+  position: absolute;
+  width: 100%
+}
 .centered-block {
   height: 30px;
   width: 300px;
   background: #222
   margin: 0 auto 0 auto;
 }
+*/

@@ -43,7 +43,7 @@
 (def gray-colour [200, 200, 220])
 (def centre-pos [(/ width 2) (/ height 2)])
 (def dark-blue [0, 0, 139])
-(def yellow [255, 255, 0])
+(def yellow [213, 225, 49])
 (def black [0, 0, 0])
 (def red [255, 0, 0])
 

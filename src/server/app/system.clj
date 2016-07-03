@@ -11,19 +11,22 @@
   (let [md-str-in (slurp file-name)]
     md-str-in))
 
-(defrecord MarkdownReader [config]
+(defrecord FileSystemReader [config]
   component/Lifecycle
   (start [this]
-    (let [{:keys [path-to-mkd-file] :as value} (:value config)
-          _ (println "SEE: " value)
-          _ (assert path-to-mkd-file (str "Got nufin from config: " config))]
-      (assoc this :markdown-text
-                  (read-raw-plan path-to-mkd-file))))
+    (let [{:keys [path-to-mkd-file path-to-contacts-file name phone email] :as value} (:value config)
+          _ (assert path-to-mkd-file (str "Got nufin from config for path-to-mkd-file: " value))
+          ;_ (assert path-to-contacts-file (str "Got nufin from config for path-to-contacts-file: " value))
+          ]
+      (assoc this :markdown-text (read-raw-plan path-to-mkd-file)
+                  :signature {:name name
+                              :phone phone
+                              :email email})))
   (stop [this] this))
 
-(defn build-markdown-reader []
+(defn build-filesystem-reader []
   (component/using
-    (map->MarkdownReader {})
+    (map->FileSystemReader {})
     [:config]))
 
 (defn logging-mutate [env k params]
@@ -38,5 +41,5 @@
   (core/make-untangled-server
     :config-path app-config-path
     :parser (om/parser {:read logging-query :mutate logging-mutate})
-    :parser-injections #{:markdown}
-    :components {:markdown (build-markdown-reader)}))
+    :parser-injections #{:filesystem}
+    :components {:filesystem (build-filesystem-reader)}))

@@ -14,13 +14,12 @@
   [{:keys [state]} _ {:keys [seconds-elapsed]}]
   {:action (fn []
              (swap! state (fn [st]
-                            ;(println "elapsed: " seconds-elapsed)
-                            (-> st
-                                (assoc-in [:plan/by-id 1 :red] (moles/red-pulse seconds-elapsed))
-                                (assoc-in [:plan/by-id 1 :green] (moles/green-pulse seconds-elapsed))
-                                (assoc-in [:plan/by-id 1 :blue] (moles/blue-pulse seconds-elapsed))))))})
+                            (let [bg-colour {:red   (moles/red-pulse seconds-elapsed)
+                                             :green (moles/green-pulse seconds-elapsed)
+                                             :blue  (moles/blue-pulse seconds-elapsed)}]
+                              (assoc-in st [:plan/by-id 1 :bg-colour] bg-colour)))))})
 
-(defn convert-to-html [markdown]
+(defn- convert-to-html [markdown]
   ;; note the syntax below: js/VarFromExternsFile.property
   ;; the dot on the end is the usual Clojure interop syntax: (Constructor. constructor-arg constructor-arg)
   ;; #js {:tables true}
@@ -43,4 +42,4 @@
                               (-> st
                                   (assoc :plans idents)
                                   (dissoc :imported-plans)
-                                  (assoc-in [:plan/by-id 1 :html-text] text))))))})
+                                  (assoc-in [:plan/by-id 1 :markup] text))))))})
