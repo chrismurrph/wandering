@@ -1,5 +1,6 @@
 (ns app.system
   (:require
+    [clojure.data.json :as json]
     [untangled.server.core :as core]
     [app.api :as api]
     [om.next.server :as om]
@@ -11,14 +12,20 @@
   (let [md-str-in (slurp file-name)]
     md-str-in))
 
+(defn read-contacts [file-name]
+  (let [contacts (slurp file-name)
+        res (json/read-str contacts :key-fn clojure.core/keyword)]
+    res))
+
 (defrecord FileSystemReader [config]
   component/Lifecycle
   (start [this]
     (let [{:keys [path-to-mkd-file path-to-contacts-file name phone email] :as value} (:value config)
           _ (assert path-to-mkd-file (str "Got nufin from config for path-to-mkd-file: " value))
-          ;_ (assert path-to-contacts-file (str "Got nufin from config for path-to-contacts-file: " value))
+          _ (assert path-to-contacts-file (str "Got nufin from config for path-to-contacts-file: " value))
           ]
       (assoc this :markdown-text (read-raw-plan path-to-mkd-file)
+                  :contacts (read-contacts path-to-contacts-file)
                   :signature {:name name
                               :phone phone
                               :email email})))

@@ -18,5 +18,7 @@
 (defmethod api-read :imported-plans [{:keys [filesystem]} _ _]
   {:value [{:id 1
             :markdown (:markdown-text filesystem)
-            :signature (:signature filesystem)}
+            :signature (:signature filesystem)
+            :contacts (:contacts filesystem)
+            }
            ]})

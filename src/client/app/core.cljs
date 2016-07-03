@@ -10,7 +10,7 @@
 (defonce app (atom (uc/new-untangled-client
                      :started-callback
                      (fn [{:keys [reconciler]}]
-                       (df/load-data reconciler [{:imported-plans (om/get-query ui/ShowdownPlan)}]
+                       (df/load-data reconciler [{:imported-plans (om/get-query ui/ShowdownDocument)}]
                                      :post-mutation 'fetch/plan-loaded
                                      :refresh [:plans])))))
 

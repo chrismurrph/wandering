@@ -4,7 +4,7 @@
             yahoo.intl-messageformat-with-locales
             [untangled.client.core :as uc]
             [app.molecules :as moles]
-            [clojure.string :as str]
+            [components.login-dialog :as dialog]
             [cljs.core.async
              :refer [<! >! chan close! put! timeout]])
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
@@ -127,19 +127,23 @@
       ;; will do for now
       ;;
       (dom/div #js{:className "tubes-general-container"}
-               (dom/div nil (str "     " name))
-               (dom/div #js{:className "side fa fa-phone fa-1x"} (str "     " phone))
-               (dom/div "")
-               (dom/div #js{:className "fa fa-envelope fa-1x"} (str "     " email))))))
+               (dom/div #js{:style #js{:float "right" :width "150px"}} name)
+               (dom/br nil)
+               (dom/div #js{:className "fa fa-phone fa-1x" :style #js{:float "right" :width "150px"}} (str " " phone))
+               (dom/br nil)
+               (dom/div #js{:className "fa fa-envelope fa-1x" :style #js{:float "right" :width "150px"}} (str " " email))
+               (dom/br nil)(dom/br nil)))))
 (def ui-signature (om/factory Signature))
 
 (defui ^:once BackgroundColour
   static om/IQuery
   (query [this] [:red :green :blue]))
 
-(defui ^:once ShowdownPlan
+(defui ^:once ShowdownDocument
   static om/IQuery
-  (query [this] [:id :markdown :markup
+  (query [this] [:id
+                 :markdown :markup
+                 :contacts
                  {:signature (om/get-query Signature)}
                  {:elapsed-join (om/get-query Molecules)}
                  {:bg-colour (om/get-query BackgroundColour)}])
@@ -163,16 +167,33 @@
                         (dom/div #js{:className "inner-front"}
                                  (dom/div #js {:dangerouslySetInnerHTML #js {:__html titled-markup}} nil)
                                  (ui-signature signature)))))))
-(def ui-showdown-plan (om/factory ShowdownPlan {:keyfn :id}))
+(def ui-showdown-document (om/factory ShowdownDocument {:keyfn :id}))
+
+;;
+;; Needs to update app/login-info in app state
+;;
+(defn login-process [un pw]
+  (println "Login transact! for " un pw))
 
 (defui ^:once Root
+  static uc/InitialAppState
+  (initial-state [clz params] {:plans [] :app/login-info (uc/initial-state dialog/LoginDialog {:app/name "Unknown"})})
   static om/IQuery
-  (query [this] [:ui/react-key {:plans (om/get-query ShowdownPlan)}])
+  (query [this] [:ui/react-key {:plans (om/get-query ShowdownDocument)} {:app/login-info (om/get-query dialog/LoginDialog)}])
   Object
+  (cancel-sign-in-fn [this]
+    (println "User cancelled, doing nothing, we ought to take user back to web page came from"))
+  (sign-in-fn [this un pw]
+    (println "Trying to sign in for: " un pw)
+    (login-process un pw))
   (render [this]
-    (let [{:keys [ui/react-key plans]} (om/props this)
+    (let [{:keys [ui/react-key plans app/login-info]} (om/props this)
+          _ (assert login-info)
+          {:keys [app/authenticated?]} login-info
           the-plan (first plans)
           ]
       (dom/div #js{:key react-key}
-               (dom/div nil
-                        (ui-showdown-plan the-plan))))))
+               (if authenticated?
+                 (ui-showdown-document the-plan)
+                 (dialog/ui-login-dialog (om/computed login-info {:sign-in-fn        #(.sign-in-fn this %1 %2)
+                                                                  :cancel-sign-in-fn #(.cancel-sign-in-fn this)})))))))

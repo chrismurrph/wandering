@@ -15,3 +15,7 @@
    obj)
   ([msg predicate obj]
    obj))
+
+(defn boolean? [v]
+  (or (true? v) (false? v)))
+
