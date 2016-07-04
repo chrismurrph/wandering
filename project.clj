@@ -8,7 +8,7 @@
                  [org.clojure/clojurescript "1.8.51"]
                  [org.omcljs/om "1.0.0-alpha37"]
                  [navis/untangled-client "0.5.3" :exclusions [cljsjs/react org.omcljs/om]]
-                 [navis/untangled-server "0.5.1"]
+                 [navis/untangled-server "0.6.0"]
                  [navis/untangled-spec "0.3.7-1"]
                  [com.taoensso/timbre "4.3.1"]
                  [commons-codec "1.10"]

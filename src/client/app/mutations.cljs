@@ -29,6 +29,11 @@
     ;; methods you call will generally need to be called out as prototype values in the externs
     (.makeHtml converter markdown)))
 
+(defmethod m/mutate 'app/authenticate
+  [{:keys [state]} _ _]
+  {:action (fn []
+             (swap! state #(assoc-in % [:login-dlg/by-id 2 :app/authenticated?] true)))})
+
 (defmethod m/mutate 'fetch/plan-loaded
   [{:keys [state]} _ _]
   {:action (fn []

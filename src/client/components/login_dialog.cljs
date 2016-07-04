@@ -37,7 +37,7 @@
                (dom/div #js {:className "dialog-closer" :onClick cancel-sign-in-fn})
                (dom/div #js {:className "dialog-content"}
                         (dom/h1 #js {:className "dialog-title"}
-                                "Welcome to" (dom/span #js {:className "board-name"} name))
+                                "" (dom/span #js {:className "board-name"} name))
                         (dom/form #js {:onSubmit #(.preventDefault %)}
                                   (dom/div #js {:className "form-row"}
                                            (dom/label nil "Name:")
@@ -53,6 +53,6 @@
                                                   :onChange    #(om/update-state! this assoc :pw (.. % -target -value))})))
                         (dom/p #js {:className "dialog-buttons"}
                                (dom/button #js{:onClick #(.sign-in this un pw)} "Sign in")
-                               (dom/button #js{:onClick cancel-sign-in-fn} "Cancel")))))))
+                               #_(dom/button #js{:onClick cancel-sign-in-fn} "Cancel")))))))
 
 (def ui-login-dialog (om/factory LoginDialog {:keyfn :id}))

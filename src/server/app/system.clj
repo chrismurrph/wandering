@@ -24,7 +24,7 @@
           _ (assert path-to-mkd-file (str "Got nufin from config for path-to-mkd-file: " value))
           _ (assert path-to-contacts-file (str "Got nufin from config for path-to-contacts-file: " value))
           ]
-      (assoc this :markdown-text (read-raw-plan path-to-mkd-file)
+      (assoc this :markdown (read-raw-plan path-to-mkd-file)
                   :contacts (read-contacts path-to-contacts-file)
                   :signature {:name name
                               :phone phone
