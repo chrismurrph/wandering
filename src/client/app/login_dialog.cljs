@@ -1,4 +1,4 @@
-(ns components.login-dialog
+(ns app.login-dialog
   (:require [om.next :as om :refer-macros [defui]]
             [om.dom :as dom]
             [app.utils :as u]
@@ -25,7 +25,7 @@
       (sign-in-fn un pw)))
   (render [this]
     (let [{:keys [id app/name app/authenticated?]} (om/props this)
-          _ (assert id)
+          _ (assert id (str "No id where props: " (om/props this)))
           _ (assert name)
           _ (assert (u/boolean? authenticated?))
           {:keys [cancel-sign-in-fn]} (om/get-computed this)

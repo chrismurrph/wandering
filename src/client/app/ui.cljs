@@ -5,7 +5,6 @@
             [untangled.client.core :as uc]
             [app.molecules :as moles]
             [app.utils :as u]
-            [components.login-dialog :as dialog]
             [cljs.core.async
              :refer [<! >! chan close! put! timeout]]
             [clojure.string :as str])
@@ -188,26 +187,3 @@
           okay? pw-match?]
       (when okay?
         (om/transact! component '[(app/authenticate)])))))
-
-(defui ^:once Root
-  static uc/InitialAppState
-  (initial-state [clz params] {:plans [] :app/login-info (uc/initial-state dialog/LoginDialog {:app/name "SMARTGAS-connect marketing plan"})})
-  static om/IQuery
-  (query [this] [:ui/react-key {:plans (om/get-query ShowdownDocument)} {:app/login-info (om/get-query dialog/LoginDialog)}])
-  Object
-  (cancel-sign-in-fn [this]
-    (println "User cancelled, doing nothing, we ought to take user back to web page came from"))
-  (sign-in-fn [this un pw]
-    (println "Trying to sign in for: " un pw)
-    (login-process! this un pw (-> (om/props this) :plans first :contacts)))
-  (render [this]
-    (let [{:keys [ui/react-key plans app/login-info]} (om/props this)
-          _ (assert login-info)
-          {:keys [app/authenticated?]} login-info
-          the-plan (first plans)
-          ]
-      (dom/div #js{:key react-key}
-               (if authenticated?
-                 (ui-showdown-document the-plan)
-                 (dialog/ui-login-dialog (om/computed login-info {:sign-in-fn        #(.sign-in-fn this %1 %2)
-                                                                  :cancel-sign-in-fn #(.cancel-sign-in-fn this)})))))))
