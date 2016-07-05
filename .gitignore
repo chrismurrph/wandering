@@ -3,9 +3,9 @@ marketing_for_kevin
 wandering.iml
 figwheel_server.log
 .idea
-/resources/public/js/compiled
 /resources/public/wandering/js
-/resources/public/css
-/resources/public/fonts
+/resources/public/wandering/css
+/resources/public/wandering/fonts
 /resources/config/wandering.edn
 /target
+/lib

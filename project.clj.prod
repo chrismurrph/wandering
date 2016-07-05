@@ -26,15 +26,13 @@
   :source-paths ["src/server"]
 
   :jvm-opts ["-server" "-Xmx1024m" "-Xms512m" "-XX:-OmitStackTraceInFastThrow"]
-  :clean-targets ^{:protect false} ["resources/public/js" "target"]
+  :clean-targets ^{:protect false} ["target"]
 
   :cljsbuild {:builds
               [{:id           "prod"
                 :source-paths ["src/client"]
                 :figwheel     true
-                :compiler     {:asset-path           "js/compiled/prod"
-                               ;;;;;:output-to            "resources/public/js/compiled/prod-app.js"
-                               ;;;;;:output-dir           "resources/public/js/compiled/prod"
+                :compiler     {:asset-path           "wandering/js/prod"
                                :output-to            "resources/public/wandering/js/main.js"
                                :output-dir           "resources/public/wandering/js/prod_out"
                                :optimizations        :whitespace

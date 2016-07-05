@@ -1,5 +1,4 @@
 mv ./project.clj.prod ./project.clj
-rm -rf ./resources/public/js
 rm -rf ./resources/public/wandering/js
 lein clean
 lein deps

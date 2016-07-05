@@ -27,16 +27,16 @@
 
   :test-paths ["test/client"]
   :jvm-opts ["-server" "-Xmx1024m" "-Xms512m" "-XX:-OmitStackTraceInFastThrow"]
-  :clean-targets ^{:protect false} ["resources/public/js" "target"]
+  :clean-targets ^{:protect false} ["resources/public/wandering/js" "target"]
 
   :cljsbuild {:builds
               [{:id           "dev"
                 :source-paths ["src/client" "dev/client"]
                 :figwheel     true
                 :compiler     {:main                 cljs.user
-                               :asset-path           "js/compiled/dev"
-                               :output-to            "resources/public/js/compiled/dev-app.js"
-                               :output-dir           "resources/public/js/compiled/dev"
+                               :asset-path           "wandering/js/dev"
+                               :output-to            "resources/public/wandering/js/dev-app.js"
+                               :output-dir           "resources/public/wandering/js/dev"
                                :optimizations        :none
                                :parallel-build       false
                                :verbose              false
@@ -46,9 +46,9 @@
                 :source-paths ["src/client"]
                 :figwheel     true
                 :compiler     {:main                 app.main
-                               :asset-path           "js/compiled/prod"
-                               :output-to            "resources/public/js/compiled/prod-app.js"
-                               :output-dir           "resources/public/js/compiled/prod"
+                               :asset-path           "wandering/js/prod"
+                               :output-to            "resources/public/wandering/js/prod-app.js"
+                               :output-dir           "resources/public/wandering/js/prod"
                                :optimizations        :advanced
                                :parallel-build       false
                                :verbose              false
@@ -58,13 +58,13 @@
                 :source-paths ["test/client" "src/client"]
                 :figwheel     true
                 :compiler     {:main                 app.suite
-                               :output-to            "resources/public/js/specs/specs.js"
-                               :output-dir           "resources/public/js/compiled/specs"
-                               :asset-path           "js/compiled/specs"
+                               :output-to            "resources/public/wandering/js/specs.js"
+                               :output-dir           "resources/public/wandering/js/specs"
+                               :asset-path           "wandering/js/specs"
                                :recompile-dependents true
                                :optimizations        :none}}]}
 
   :less {:source-paths ["less/app.main.less"]
-         :target-path  "resources/public/css/app.css"}
+         :target-path  "resources/public/wandering/css/app.css"}
 
   :repl-options {:init-ns user})
