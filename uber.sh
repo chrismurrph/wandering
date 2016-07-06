@@ -1,4 +1,6 @@
 mv ./project.clj.prod ./project.clj
+## Theoretically only need to delete from 2nd one here, but good to do both in case I start 'playing'
+rm -rf ./resources/public/js
 rm -rf ./resources/public/wandering/js
 lein clean
 lein deps

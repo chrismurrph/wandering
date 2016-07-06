@@ -9,3 +9,4 @@ figwheel_server.log
 /resources/config/wandering.edn
 /target
 /lib
+main.js
