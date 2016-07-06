@@ -7,12 +7,13 @@
     [app.root :as root]
     [untangled.client.core :as uc]))
 
+(enable-console-print!)
+
 ; Use Chrome...these enable proper formatting of cljs data structures!
 (devtools/enable-feature! :sanity-hints)
 (devtools/install!)
 
 (def log-app-state (partial util/log-app-state app))
 
-(comment "Just including root here s/be enough"
-  (reset! app (uc/mount @app root/Root "app")))
+(reset! app (uc/mount @app root/Root "app"))
 

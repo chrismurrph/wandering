@@ -6,9 +6,7 @@
 (defmethod m/mutate 'app/elapsed
   [{:keys [state]} _ {:keys [elapsed]}]
   {:action (fn []
-             (swap! state (fn [st]
-                            (-> st
-                                (assoc :elapsed elapsed)))))})
+             (swap! state assoc :app/elapsed elapsed))})
 
 (defmethod m/mutate 'app/bg-colour-change
   [{:keys [state]} _ {:keys [seconds-elapsed]}]

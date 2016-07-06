@@ -15,7 +15,7 @@
 ;
 (def side-length 50)
 
-(defui Molecule
+(defui ^:once Molecule
   Object
   (render [this]
     (let [{:keys [x y mole-fill last-degrees-angle symbol-txt max-saturation]} (om/props this)
@@ -42,7 +42,7 @@
 ;
 ; Use for debugging because it is easier to see than the Molecule
 ;
-(defui Rect
+(defui ^:once Rect
   Object
   (render [this]
     (let [{:keys [id x y mole-fill last-degrees-angle max-saturation]} (om/props this)
@@ -66,34 +66,64 @@
       (dom/rect (clj->js rect-props)))))
 (def rect-comp (om/factory Rect {:keyfn :id}))
 
-(defn emit-move-molecules [state]
-  (as-> state $
-        (update $ :elapsed #(inc %))
-        (moles/emit-molecule-particles $)
-        (update $ :molecule-particles #(map moles/move-molecule-symbol %))
-        ;(u/probe "state" $)
-        ))
+;;
+;; Things are happening. Even if we have stopped creating new molecules, we are at
+;; least moving them further away
+;;
+(defn emit-and-move-molecules [state]
+  (u/log-off (str "Emitting: " (select-keys state [:elapsed])))
+  (-> state
+      (update :elapsed #(inc %))
+      (moles/emit-molecule-particles)
+      (update :molecule-particles #(map moles/move-molecule-symbol %))
+      ))
 
-(defui ^once Molecules
-  static om/IQuery
-  (query [this] [:elapsed])
+;;
+;; Start of quiet period
+;;
+(defn start-over [state]
+  (u/log-on "Starting over")
+  (-> state
+      (assoc :elapsed -9000)
+      (assoc :molecule-particles [])
+      ))
+
+;;
+;; Quiet period, waiting for next chance to emit again. Too annoying to have them all the time!
+;; :molecule-particles is an empty vector and staying that way
+;;
+(defn mark-time [state]
+  (update state :elapsed #(inc %)))
+
+(defn to-next-state [component colour-change-fn state]
+  (let [elapsed (:elapsed state)
+        _ (u/log-off (str "elapsed: " elapsed))]
+    (cond
+      (< elapsed 0) (mark-time state)
+      (< elapsed 3000) (let [{:keys [molecule-particles elapsed] :as new-state} (emit-and-move-molecules state)
+                             _ (om/update-state! component assoc :local-particles molecule-particles)]
+                         (when (moles/ten-second-mark? elapsed)
+                           (colour-change-fn elapsed))
+                         new-state)
+      (= elapsed 3000) (let [new-state (start-over state)
+                             _ (om/update-state! component assoc :local-particles [])]
+                         new-state))))
+
+;;
+;; Plain React component, that re-renders based on value of :molecule-particles, that is kept in local state
+;;
+(defui ^:once Molecules
   Object
   (componentDidMount [this]
-    (let []
+    (let [{:keys [colour-change-fn]} (om/props this)
+          _ (assert colour-change-fn)
+          _ (assert (fn? colour-change-fn))]
       (go-loop [state {:elapsed 0 :molecule-particles []}]
-               (<! (timeout moles/wait-time))
-               (when (< (:elapsed state) 3000)
-                 (let [{:keys [molecule-particles elapsed] :as new-state} (emit-move-molecules state)]
-                   (om/transact! this `[(app/elapsed {:elapsed ~elapsed})])
-                   (when (moles/ten-second-mark? elapsed)
-                     (om/transact! this `[(app/bg-colour-change {:seconds-elapsed ~(/ elapsed moles/fps)}) [:plan/by-id 1]]))
-                   (om/update-state! this assoc :molecule-particles molecule-particles)
-                   ;(println "IN LOCAL STATE: " (count molecule-particles) "at" elapsed)
-                   (recur new-state))))))
-  (componentWillUnmount [this]
-    (om/update-state! this dissoc :molecule-particles))
+               (let [_ (<! (timeout moles/wait-time))
+                     new-state (to-next-state this colour-change-fn state)]
+                 (recur new-state)))))
   (render [this]
-    (let [particles (om/get-state this :molecule-particles)
+    (let [particles (om/get-state this :local-particles)
           ;_ (println "In render with " (count particles))
           ]
       (dom/svg #js{:className "back"
@@ -146,24 +176,26 @@
                  :markdown :markup
                  :contacts
                  {:signature (om/get-query Signature)}
-                 {:elapsed-join (om/get-query Molecules)}
+                 ;{:elapsed-join (om/get-query Molecules)}
                  {:bg-colour (om/get-query BackgroundColour)}])
   static om/Ident
   (ident [this {:keys [id]}] [:plan/by-id id])
   Object
+  (colour-change [this elapsed]
+    (om/transact! this `[(app/bg-colour-change {:seconds-elapsed ~(/ elapsed moles/fps)}) :plan/by-id]))
   (render [this]
-    (let [{:keys [id markup signature elapsed-join bg-colour]} (om/props this)
+    (let [{:keys [id markup signature bg-colour]} (om/props this)
           {:keys [red green blue]} bg-colour
           red (or red (moles/red-pulse 1))
           green (or green (moles/green-pulse 1))
           blue (or blue (moles/blue-pulse 1))
-          _ (println (str "r g b: ==" red "," green "," blue "=="))
+          ;_ (println (str "r g b: ==" red "," green "," blue "=="))
           background-fill (str "rgba(" red "," green "," blue ",0.3)")
           titled-markup (centre-first-heading markup)
           ]
       (dom/div #js{:className "container" :style #js{:width  (str moles/width "px")
                                                      :height (str moles/height "px")}}
-               (ui-molecules elapsed-join)
+               (ui-molecules {:colour-change-fn #(.colour-change this %)})
                (dom/div #js{:className "front" :style #js{:backgroundColor background-fill}}
                         (dom/div #js{:className "inner-front"}
                                  (dom/div #js {:dangerouslySetInnerHTML #js {:__html titled-markup}} nil)
@@ -178,12 +210,14 @@
 ;;
 ;; For now just work out the result and transact! so that authenicated? in client gets changed
 ;;
-(defn login-process! [component user-id pass-id contacts]
-  (println "Login transact! for " user-id pass-id " from " (count contacts))
-  (if (or (str/blank? user-id) (str/blank? pass-id))
-    (js/alert "Please enter user-id and pass-id first")
-    (let [contact (some (fn [c] (when (u/=ignore-case (:first c) user-id) c)) contacts)
-          pw-match? (and contact (or (u/=ignore-case (:last contact) pass-id) (some #(u/phone-match? pass-id %) (:phones contact))))
-          okay? pw-match?]
-      (when okay?
-        (om/transact! component '[(app/authenticate)])))))
+(defn login-process! [component un pw contacts]
+  (let [user-id (str/trim un)
+        pass-id (str/trim pw)]
+    (println "Login transact! for " user-id pass-id " from " (count contacts))
+    (if (or (str/blank? user-id) (str/blank? pass-id))
+      (js/alert "Please enter user-id and pass-id first")
+      (let [contact (some (fn [c] (when (u/=ignore-case (:first c) user-id) c)) contacts)
+            pw-match? (and contact (or (u/=ignore-case (:last contact) pass-id) (some #(u/phone-match? pass-id %) (:phones contact))))
+            okay? pw-match?]
+        (when okay?
+          (om/transact! component '[(app/authenticate)]))))))

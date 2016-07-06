@@ -14,3 +14,11 @@
                                      :post-mutation 'fetch/plan-loaded
                                      :refresh [:plans])))))
 
+(defn my-reconciler-available? []
+  (:reconciler @app))
+
+(defn my-reconciler []
+  (let [rec (:reconciler @app)
+        _ (assert rec "No reconciler available")]
+    rec))
+

@@ -6,15 +6,16 @@
             [app.core :as core]
             [app.ui :as ui]
             [app.login-dialog :as dialog]
-            [app.utils :as u]))
-
-(enable-console-print!)
+            [app.utils :as u]
+            [app.molecules :as moles]))
 
 (defui ^:once Root
   static uc/InitialAppState
   (initial-state [clz params] {:plans [] :app/login-info (uc/initial-state dialog/LoginDialog {:app/name "SMARTGAS-connect marketing plan"})})
   static om/IQuery
-  (query [this] [:ui/react-key {:plans (om/get-query ui/ShowdownDocument)} {:app/login-info (om/get-query dialog/LoginDialog)}])
+  (query [this] [:ui/react-key
+                 {:plans (om/get-query ui/ShowdownDocument)}
+                 {:app/login-info (om/get-query dialog/LoginDialog)}])
   Object
   (cancel-sign-in-fn [this]
     (println "User cancelled, doing nothing, we ought to take user back to web page came from"))

@@ -1,11 +1,33 @@
 (ns app.utils
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [cljs.core.async
+             :refer [<! >! chan close! put! timeout]])
+  (:require-macros [cljs.core.async.macros :refer [go-loop]]))
+
+;;
+;; Just a println would be fine in a javascript environ. But this way can code exactly
+;; same in both environments, and port the code across easily.
+;;
+
+(def ^:private log-chan (chan))
+
+(go-loop []
+         (when-let [v (<! log-chan)]
+           (println v)
+           (recur)))
+
+(defn log [debug msg]
+  (when debug (put! log-chan msg)))
+
+(defn log-on [msg]
+  (log true msg))
+
+(defn log-off [msg])
 
 (defn probe
-  ([predicate msg obj]
-   (assert (fn? predicate))
-   (when-let [res (predicate obj)]
-     (println (str (str/upper-case msg) ":\n" obj)))
+  ([fn msg obj]
+   (assert (fn? fn))
+   (println (str (str/upper-case msg) ":\n" (fn obj)))
    obj)
   ([msg obj]
    (probe (constantly true) msg obj)))
