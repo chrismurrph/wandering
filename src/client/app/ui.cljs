@@ -7,7 +7,11 @@
             [app.utils :as u]
             [cljs.core.async
              :refer [<! >! chan close! put! timeout]]
-            [clojure.string :as str])
+            [clojure.string :as str]
+            [cljs-time.core :as time]
+            [cljs-time.format :as format-time]
+            [cljs-time.coerce :as coerce]
+            )
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
 ;
@@ -78,11 +82,15 @@
       (update :molecule-particles #(map moles/move-molecule-symbol %))
       ))
 
+(def date-time-formatter (format-time/formatter "dd_MM_yyyy__HH_mm_ss.SSS"))
+
 ;;
 ;; Start of quiet period
 ;;
 (defn start-over [state]
-  (u/log-on "Starting over")
+  (u/log-on (str "Starting over at " (as-> (time/now) $
+                                           (time/to-default-time-zone $)
+                                           (format-time/unparse date-time-formatter $))))
   (-> state
       (assoc :elapsed -9000)
       (assoc :molecule-particles [])
