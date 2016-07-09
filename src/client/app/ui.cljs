@@ -157,20 +157,23 @@
 
 (defui ^:once Signature
   static om/IQuery
-  (query [this] [:name :phone :email])
+  (query [this] [:name :company :phone :email])
   Object
   (render [this]
-    (let [{:keys [name phone email]} (om/props this)]
+    (let [{:keys [name company phone email]} (om/props this)
+          style-js #js{:float "right" :width "210px"}]
       ;;
       ;; I would have thought this would go to the middle. But on the left
       ;; will do for now
       ;;
       (dom/div #js{:className "tubes-general-container"}
-               (dom/div #js{:style #js{:float "right" :width "150px"}} name)
+               (dom/div #js{:style style-js} name)
                (dom/br nil)
-               (dom/div #js{:className "fa fa-phone fa-1x" :style #js{:float "right" :width "150px"}} (str " " phone))
+               (dom/div #js{:className "fa fa-building-o fa-1x" :style style-js} (str " " company))
                (dom/br nil)
-               (dom/div #js{:className "fa fa-envelope fa-1x" :style #js{:float "right" :width "150px"}} (str " " email))
+               (dom/div #js{:className "fa fa-phone fa-1x" :style style-js} (str " " phone))
+               (dom/br nil)
+               (dom/div #js{:className "fa fa-envelope fa-1x" :style style-js} (str " " email))
                (dom/br nil)(dom/br nil)))))
 (def ui-signature (om/factory Signature))
 
@@ -184,7 +187,6 @@
                  :markdown :markup
                  :contacts
                  {:signature (om/get-query Signature)}
-                 ;{:elapsed-join (om/get-query Molecules)}
                  {:bg-colour (om/get-query BackgroundColour)}])
   static om/Ident
   (ident [this {:keys [id]}] [:plan/by-id id])

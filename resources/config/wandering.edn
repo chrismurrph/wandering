@@ -2,5 +2,6 @@
  :path-to-mkd-file "/home/chris/state/marketing_for_kevin"
  :path-to-contacts-file "/opt/jetty/contacts.txt"
  :name "Chris Murphy"
+ :company "Seaweed Software Pty Ltd"
  :phone "0403 162 669"
  :email "chris@strandz.org"}

@@ -19,7 +19,7 @@
 (defn blue-pulse [seconds-elapsed] (pulse seconds-elapsed 240 255 5.0))
 
 (def width 955)
-(def height 3000)
+(def height 4440)
 (def centre-distance (/ height 2))
 
 ;;
