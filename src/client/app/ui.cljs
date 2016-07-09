@@ -2,7 +2,6 @@
   (:require [om.dom :as dom]
             [om.next :as om :refer-macros [defui]]
             yahoo.intl-messageformat-with-locales
-            [untangled.client.core :as uc]
             [app.molecules :as moles]
             [app.utils :as u]
             [cljs.core.async
@@ -10,7 +9,6 @@
             [clojure.string :as str]
             [cljs-time.core :as time]
             [cljs-time.format :as format-time]
-            [cljs-time.coerce :as coerce]
             )
   (:require-macros [cljs.core.async.macros :refer [go go-loop]]))
 
@@ -22,9 +20,10 @@
 (defui ^:once Molecule
   Object
   (render [this]
-    (let [{:keys [x y mole-fill last-degrees-angle symbol-txt max-saturation]} (om/props this)
+    (let [{:keys [panel-height x y mole-fill last-degrees-angle symbol-txt max-saturation]} (om/props this)
+          _ (assert panel-height)
           [r g b] mole-fill
-          saturation (moles/calc-distance-saturation {:x x :y y :max-saturation max-saturation})
+          saturation (moles/calc-distance-saturation panel-height {:x x :y y :max-saturation max-saturation})
           colour (str "rgba(" r "," g "," b "," saturation ")")
           centre-x (+ x (/ side-length 2))
           centre-y (+ y (/ side-length 2))
@@ -49,8 +48,8 @@
 (defui ^:once Rect
   Object
   (render [this]
-    (let [{:keys [id x y mole-fill last-degrees-angle max-saturation]} (om/props this)
-          saturation (moles/calc-distance-saturation {:x x :y y :max-saturation max-saturation})
+    (let [{:keys [id panel-height x y mole-fill last-degrees-angle max-saturation]} (om/props this)
+          saturation (moles/calc-distance-saturation panel-height {:x x :y y :max-saturation max-saturation})
           centre-x (+ x (/ side-length 2))
           centre-y (+ y (/ side-length 2))
           _ (when (= (str id) "G__1")
@@ -74,11 +73,11 @@
 ;; Things are happening. Even if we have stopped creating new molecules, we are at
 ;; least moving them further away
 ;;
-(defn emit-and-move-molecules [state]
+(defn emit-and-move-molecules [panel-height state]
   (u/log-off (str "Emitting: " (select-keys state [:elapsed])))
   (-> state
       (update :elapsed #(inc %))
-      (moles/emit-molecule-particles)
+      (moles/emit-molecule-particles panel-height)
       (update :molecule-particles #(map moles/move-molecule-symbol %))
       ))
 
@@ -103,12 +102,12 @@
 (defn mark-time [state]
   (update state :elapsed #(inc %)))
 
-(defn to-next-state [component colour-change-fn state]
+(defn to-next-state [component panel-height colour-change-fn state]
   (let [elapsed (:elapsed state)
         _ (u/log-off (str "elapsed: " elapsed))]
     (cond
       (< elapsed 0) (mark-time state)
-      (< elapsed 3000) (let [{:keys [molecule-particles elapsed] :as new-state} (emit-and-move-molecules state)
+      (< elapsed 3000) (let [{:keys [molecule-particles elapsed] :as new-state} (emit-and-move-molecules panel-height state)
                              _ (om/update-state! component assoc :local-particles molecule-particles)]
                          (when (moles/ten-second-mark? elapsed)
                            (colour-change-fn elapsed))
@@ -123,21 +122,23 @@
 (defui ^:once Molecules
   Object
   (componentDidMount [this]
-    (let [{:keys [colour-change-fn]} (om/props this)
+    (let [{:keys [colour-change-fn panel-height]} (om/props this)
+          _ (assert panel-height)
           _ (assert colour-change-fn)
           _ (assert (fn? colour-change-fn))]
       (go-loop [state {:elapsed 0 :molecule-particles []}]
                (let [_ (<! (timeout moles/wait-time))
-                     new-state (to-next-state this colour-change-fn state)]
+                     new-state (to-next-state this panel-height colour-change-fn state)]
                  (recur new-state)))))
   (render [this]
     (let [particles (om/get-state this :local-particles)
+          {:keys [panel-height]} (om/props this)
           ;_ (println "In render with " (count particles))
           ]
       (dom/svg #js{:className "back"
                    :opacity   "0.85"
-                   :height    (str moles/height "px")
-                   :width     (str moles/width "px")}
+                   :height    (str panel-height "px")
+                   :width     (str moles/panel-width "px")}
                (dom/g nil
                       (map molecule-comp particles))))))
 (def ui-molecules (om/factory Molecules {:keyfn :id}))
@@ -156,16 +157,14 @@
       (str start-sub extra end-sub))))
 
 (defui ^:once Signature
+  static om/Ident
+  (ident [_ {:keys [id]}] [:signature/by-id id])
   static om/IQuery
-  (query [this] [:name :company :phone :email])
+  (query [_] [:id :name :company :phone :email])
   Object
   (render [this]
     (let [{:keys [name company phone email]} (om/props this)
           style-js #js{:float "right" :width "210px"}]
-      ;;
-      ;; I would have thought this would go to the middle. But on the left
-      ;; will do for now
-      ;;
       (dom/div #js{:className "tubes-general-container"}
                (dom/div #js{:style style-js} name)
                (dom/br nil)
@@ -178,34 +177,40 @@
 (def ui-signature (om/factory Signature))
 
 (defui ^:once BackgroundColour
+  static om/Ident
+  (ident [_ {:keys [id]}] [:bg-colour/by-id id])
   static om/IQuery
-  (query [this] [:red :green :blue]))
+  (query [_] [:id :red :green :blue]))
 
 (defui ^:once ShowdownDocument
   static om/IQuery
-  (query [this] [:id
-                 :markdown :markup
+  (query [_] [:id
+                 :markdown
+                 :markup
                  :contacts
+                 :panel-height
                  {:signature (om/get-query Signature)}
                  {:bg-colour (om/get-query BackgroundColour)}])
   static om/Ident
-  (ident [this {:keys [id]}] [:plan/by-id id])
+  (ident [_ {:keys [id]}] [:doc/by-id id])
   Object
   (colour-change [this elapsed]
-    (om/transact! this `[(app/bg-colour-change {:seconds-elapsed ~(/ elapsed moles/fps)}) :plan/by-id]))
+    (om/transact! this `[(app/bg-colour-change {:seconds-elapsed ~(/ elapsed moles/fps)}) :doc/by-id]))
   (render [this]
-    (let [{:keys [id markup signature bg-colour]} (om/props this)
+    (let [{:keys [markup signature bg-colour panel-height]} (om/props this)
+          ;_ (println "panel height coming thru: " panel-height)
+          ;_ (println "bg-colour coming thru: " bg-colour)
           {:keys [red green blue]} bg-colour
           red (or red (moles/red-pulse 1))
           green (or green (moles/green-pulse 1))
           blue (or blue (moles/blue-pulse 1))
-          ;_ (println (str "r g b: ==" red "," green "," blue "=="))
           background-fill (str "rgba(" red "," green "," blue ",0.3)")
           titled-markup (centre-first-heading markup)
           ]
-      (dom/div #js{:className "container" :style #js{:width  (str moles/width "px")
-                                                     :height (str moles/height "px")}}
-               (ui-molecules {:colour-change-fn #(.colour-change this %)})
+      (dom/div #js{:className "container" :style #js{:width  (str moles/panel-width "px")
+                                                     :height (str panel-height "px")}}
+               (ui-molecules {:colour-change-fn #(.colour-change this %)
+                              :panel-height panel-height})
                (dom/div #js{:className "front" :style #js{:backgroundColor background-fill}}
                         (dom/div #js{:className "inner-front"}
                                  (dom/div #js {:dangerouslySetInnerHTML #js {:__html titled-markup}} nil)
@@ -222,7 +227,9 @@
 ;;
 (defn login-process! [component un pw contacts]
   (let [user-id (str/trim un)
-        pass-id (str/trim pw)]
+        pass-id (str/trim pw)
+        _ (assert (pos? (count contacts)))
+        ]
     (println "Login transact! for " user-id pass-id " from " (count contacts))
     (if (or (str/blank? user-id) (str/blank? pass-id))
       (js/alert "Please enter user-id and pass-id first")

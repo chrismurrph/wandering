@@ -18,30 +18,29 @@
 (defn green-pulse [seconds-elapsed] (pulse seconds-elapsed 220 240 40.0))
 (defn blue-pulse [seconds-elapsed] (pulse seconds-elapsed 240 255 5.0))
 
-(def width 955)
-(def height 4440)
-(def centre-distance (/ height 2))
+(def panel-width 955)
+
+(defn calc-centre-pos [panel-height]
+  [(/ panel-width 2) (/ panel-height 2)])
 
 ;;
 ;; Becomes brighter the further are away. Each type of molecule has a different starting saturation.
 ;;
 (defn calc-distance-saturation
-  [entity]
+  [panel-height entity]
   (let [{:keys [x y max-saturation]} entity
         _ (assert (and x y max-saturation))
-        edge-distance (mu/closest-edge-distance x y width height)
+        edge-distance (mu/closest-edge-distance x y panel-width panel-height)
+        centre-distance (/ panel-height 2)
         brightness (/ (- centre-distance edge-distance) centre-distance)]
     (* brightness max-saturation)))
 
 (def fps 11)
 (def wait-time (/ 1000 fps))
-(defn one-second-mark? [elapsed]
-  (zero? (rem elapsed fps)))
 (defn ten-second-mark? [elapsed]
   (zero? (rem elapsed (* 10 fps))))
 (def gray-saturation 30)                                    ; 200 is normal
 (def gray-colour [200, 200, 220])
-(def centre-pos [(/ width 2) (/ height 2)])
 (def dark-blue [0, 0, 139])
 (def yellow [213, 225, 49])
 (def black [0, 0, 0])
@@ -75,7 +74,7 @@
 
 ;; If one every fps is too much we can be random
 ;; If need more then we won't use conj but concat(?), and return a vector here
-(defn create-molecule-symbol []
+(defn create-molecule-symbol [panel-height centre-pos]
   (let [x-random (mu/random-float (- hatchery-area-size) hatchery-area-size)
         y-random (mu/random-float (- hatchery-area-size) hatchery-area-size)
         dir (mu/calc-direction [x-random y-random])
@@ -84,22 +83,25 @@
         x (+ (x-val centre-pos) x-random)
         y (+ (y-val centre-pos) y-random)
         pick (random-pick)
-        stand-out (mu/chance-one-in 10)]
+        stand-out? (mu/chance-one-in 10)]
     {:id                      (gensym)
      :x                       x
      :y                       y
      :dir                     dir
-     :max-saturation          (if stand-out (:max-saturation pick) gray-saturation)
-     :z                       (if stand-out 1.0 0.3)
-     :mole-fill               (if stand-out (:colour pick) gray-colour)
+     :max-saturation          (if stand-out? (:max-saturation pick) gray-saturation)
+     :z                       (if stand-out? 1.0 0.3)
+     :mole-fill               (if stand-out? (:colour pick) gray-colour)
      :symbol-txt              (:text pick)
      :speed                   (:speed pick)
      :start-degrees-angle     (int (mu/radians->degrees (mu/random-angle)))
      :change-by-degrees-angle (- (mu/random-float 0 1) 0.5)
+     :panel-height panel-height
      }))
 
-(defn emit-molecule-particles [state]
-  (let [num-particles (count (:molecule-particles state))]
+(defn emit-molecule-particles
+  [state panel-height]
+  (let [num-particles (count (:molecule-particles state))
+        centre-pos (calc-centre-pos panel-height)]
     (if (and (< num-particles 100) (mu/chance-one-in 5))
-      (update state :molecule-particles conj (create-molecule-symbol))
+      (update state :molecule-particles conj (create-molecule-symbol panel-height centre-pos))
       state)))

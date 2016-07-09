@@ -15,7 +15,7 @@
                             (let [bg-colour {:red   (moles/red-pulse seconds-elapsed)
                                              :green (moles/green-pulse seconds-elapsed)
                                              :blue  (moles/blue-pulse seconds-elapsed)}]
-                              (assoc-in st [:plan/by-id 1 :bg-colour] bg-colour)))))})
+                              (assoc-in st [:doc/by-id 1 :bg-colour] bg-colour)))))})
 
 (defn- convert-to-html [markdown]
   ;; note the syntax below: js/VarFromExternsFile.property
@@ -32,17 +32,17 @@
   {:action (fn []
              (swap! state #(assoc-in % [:login-dlg/by-id 2 :app/authenticated?] true)))})
 
-(defmethod m/mutate 'fetch/plan-loaded
+(defmethod m/mutate 'fetch/docs-loaded
   [{:keys [state]} _ _]
   {:action (fn []
-             (let [idents (get @state :imported-plans)
-                   markdown (get-in @state [:plan/by-id 1 :markdown])
+             (let [idents (get @state :imported-docs)
+                   markdown (get-in @state [:doc/by-id 1 :markdown])
                    ;_ (println "markdown: " markdown)
                    text (convert-to-html markdown)
                    ;_ (println (str "HTML: " text))
                    ]
                (swap! state (fn [st]
                               (-> st
-                                  (assoc :plans idents)
-                                  (dissoc :imported-plans)
-                                  (assoc-in [:plan/by-id 1 :markup] text))))))})
+                                  (assoc :app/docs idents)
+                                  (dissoc :imported-docs)
+                                  (assoc-in [:doc/by-id 1 :markup] text))))))})

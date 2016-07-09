@@ -15,5 +15,5 @@
 (defmethod api-read :default [{:keys [ast query]} _ _]
   (timbre/error "Unrecognized query " (op/ast->expr ast)))
 
-(defmethod api-read :imported-plans [{:keys [filesystem]} _ _]
-  {:value [(merge {:id 1} (select-keys filesystem [:markdown :signature :contacts]))]})
+(defmethod api-read :imported-docs [{:keys [filesystem]} _ _]
+  {:value [(merge {:id 1} (select-keys filesystem [:markdown :signature :contacts :panel-height]))]})
