@@ -11,7 +11,7 @@
 
 (defui ^:once Root
   static uc/InitialAppState
-  (initial-state [clz params] {:app/docs [] :app/login-info (uc/initial-state dialog/LoginDialog {:app/name "SMARTGAS-connect marketing plan"})})
+  (initial-state [clz params] {:app/docs [] :app/login-info []})
   static om/IQuery
   (query [this] [:ui/react-key
                  {:app/docs (om/get-query ui/ShowdownDocument)}
@@ -24,14 +24,16 @@
     (ui/login-process! this un pw (-> (om/props this) :app/docs first :contacts)))
   (render [this]
     (let [{:keys [ui/react-key app/docs app/login-info]} (om/props this)
-          _ (assert login-info)
-          {:keys [app/authenticated?]} login-info
-          _ (assert (u/boolean? authenticated?) (str "authenticated? should exist in login-info: " login-info))
           the-doc (first docs)
+          ;_ (assert the-doc)
+          the-login-info (first login-info)
+          ;_ (assert the-login-info)
+          {:keys [app/authenticated?]} the-login-info
+          ;_ (assert (u/boolean? authenticated?) (str "authenticated? should exist in the-login-info: " the-login-info))
           ]
       (dom/div #js{:key react-key}
                (if authenticated?
                  (ui/ui-showdown-document the-doc)
-                 (dialog/ui-login-dialog (om/computed login-info {:sign-in-fn        #(.sign-in-fn this %1 %2)
-                                                                  :cancel-sign-in-fn #(.cancel-sign-in-fn this)})))))))
+                 (dialog/ui-login-dialog (om/computed the-login-info {:sign-in-fn        #(.sign-in-fn this %1 %2)
+                                                                      :cancel-sign-in-fn #(.cancel-sign-in-fn this)})))))))
 (reset! core/app (uc/mount @core/app Root "app"))

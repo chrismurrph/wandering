@@ -9,5 +9,8 @@
 (defn -main
   "Main entry point for the server"
   [& args]
-  (let [system (sys/make-system "/usr/local/etc/wandering.edn")]
+  (let [arg (first args)
+        _ (println "arg from cmd line is: <" arg ">")
+        edn-file-name (if arg (str "/usr/local/etc/" arg ".edn") "/usr/local/etc/wandering.edn")
+        system (sys/make-system edn-file-name)]
     (component/start system)))

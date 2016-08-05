@@ -20,8 +20,9 @@
 (defrecord FileSystemReader [config]
   component/Lifecycle
   (start [this]
-    (let [{:keys [path-to-mkd-file path-to-contacts-file name company phone email panel-height] :as value} (:value config)
+    (let [{:keys [path-to-mkd-file path-to-contacts-file name company title phone email panel-height] :as value} (:value config)
           _ (assert company)
+          _ (assert title)
           _ (assert panel-height)
           _ (assert path-to-mkd-file (str "Got nufin from config for path-to-mkd-file: " value))
           _ (assert path-to-contacts-file (str "Got nufin from config for path-to-contacts-file: " value))
@@ -29,7 +30,8 @@
           contacts (read-contacts path-to-contacts-file)
           _ (assert (pos? (count contacts)))
           ]
-      (assoc this :markdown markdown
+      (assoc this :title title
+                  :markdown markdown
                   :contacts contacts
                   :panel-height panel-height
                   :signature {;:id (gensym)

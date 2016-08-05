@@ -173,7 +173,7 @@
                (dom/div #js{:className "fa fa-phone fa-1x" :style style-js} (str " " phone))
                (dom/br nil)
                (dom/div #js{:className "fa fa-envelope fa-1x" :style style-js} (str " " email))
-               (dom/br nil)(dom/br nil)))))
+               (dom/br nil) (dom/br nil)))))
 (def ui-signature (om/factory Signature))
 
 (defui ^:once BackgroundColour
@@ -185,12 +185,12 @@
 (defui ^:once ShowdownDocument
   static om/IQuery
   (query [_] [:id
-                 :markdown
-                 :markup
-                 :contacts
-                 :panel-height
-                 {:signature (om/get-query Signature)}
-                 {:bg-colour (om/get-query BackgroundColour)}])
+              :markdown
+              :markup
+              :contacts
+              :panel-height
+              {:signature (om/get-query Signature)}
+              {:bg-colour (om/get-query BackgroundColour)}])
   static om/Ident
   (ident [_ {:keys [id]}] [:doc/by-id id])
   Object
@@ -210,7 +210,7 @@
       (dom/div #js{:className "container" :style #js{:width  (str moles/panel-width "px")
                                                      :height (str panel-height "px")}}
                (ui-molecules {:colour-change-fn #(.colour-change this %)
-                              :panel-height panel-height})
+                              :panel-height     panel-height})
                (dom/div #js{:className "front" :style #js{:backgroundColor background-fill}}
                         (dom/div #js{:className "inner-front"}
                                  (dom/div #js {:dangerouslySetInnerHTML #js {:__html titled-markup}} nil)

@@ -17,3 +17,6 @@
 
 (defmethod api-read :imported-docs [{:keys [filesystem]} _ _]
   {:value [(merge {:id 1} (select-keys filesystem [:markdown :signature :contacts :panel-height]))]})
+
+(defmethod api-read :imported-logins [{:keys [filesystem]} _ _]
+  {:value [(merge {:id 2 :app/authenticated? false :title "Default title"} (select-keys filesystem [:title]))]})

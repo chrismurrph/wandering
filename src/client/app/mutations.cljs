@@ -32,10 +32,11 @@
   {:action (fn []
              (swap! state #(assoc-in % [:login-dlg/by-id 2 :app/authenticated?] true)))})
 
-(defmethod m/mutate 'fetch/docs-loaded
+(defmethod m/mutate 'fetch/init-state-loaded
   [{:keys [state]} _ _]
   {:action (fn []
-             (let [idents (get @state :imported-docs)
+             (let [docs-idents (get @state :imported-docs)
+                   logins-idents (get @state :imported-logins)
                    markdown (get-in @state [:doc/by-id 1 :markdown])
                    ;_ (println "markdown: " markdown)
                    text (convert-to-html markdown)
@@ -43,6 +44,8 @@
                    ]
                (swap! state (fn [st]
                               (-> st
-                                  (assoc :app/docs idents)
+                                  (assoc :app/docs docs-idents)
                                   (dissoc :imported-docs)
-                                  (assoc-in [:doc/by-id 1 :markup] text))))))})
+                                  (assoc-in [:doc/by-id 1 :markup] text)
+                                  (assoc :app/login-info logins-idents)
+                                  (dissoc :imported-logins))))))})
