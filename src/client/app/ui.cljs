@@ -189,6 +189,7 @@
               :markup
               :contacts
               :panel-height
+              :animation?
               {:signature (om/get-query Signature)}
               {:bg-colour (om/get-query BackgroundColour)}])
   static om/Ident
@@ -197,7 +198,7 @@
   (colour-change [this elapsed]
     (om/transact! this `[(app/bg-colour-change {:seconds-elapsed ~(/ elapsed moles/fps)}) :doc/by-id]))
   (render [this]
-    (let [{:keys [markup signature bg-colour panel-height]} (om/props this)
+    (let [{:keys [markup signature bg-colour panel-height animation?]} (om/props this)
           ;_ (println "panel height coming thru: " panel-height)
           ;_ (println "bg-colour coming thru: " bg-colour)
           {:keys [red green blue]} bg-colour
@@ -209,8 +210,9 @@
           ]
       (dom/div #js{:className "container" :style #js{:width  (str moles/panel-width "px")
                                                      :height (str panel-height "px")}}
-               (ui-molecules {:colour-change-fn #(.colour-change this %)
-                              :panel-height     panel-height})
+               (when animation?
+                 (ui-molecules {:colour-change-fn #(.colour-change this %)
+                                :panel-height     panel-height}))
                (dom/div #js{:className "front" :style #js{:backgroundColor background-fill}}
                         (dom/div #js{:className "inner-front"}
                                  (dom/div #js {:dangerouslySetInnerHTML #js {:__html titled-markup}} nil)

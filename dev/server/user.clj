@@ -33,7 +33,7 @@
 (defn init
   "Create a web server from configurations. Use `start` to start it."
   []
-  (reset! system (sys/make-system "config/wandering.edn")))
+  (reset! system (sys/make-system ["wandering"])))
 
 (defn start "Start (an already initialized) web server." [] (swap! system component/start))
 

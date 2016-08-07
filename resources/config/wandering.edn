@@ -6,4 +6,5 @@
  :company "Seaweed Software Pty Ltd"
  :phone "0403 162 669"
  :email "chris@strandz.org"
- :panel-height 4525}
+ :panel-height 4525
+ :animation? false}
