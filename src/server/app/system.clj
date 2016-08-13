@@ -82,23 +82,25 @@
 ;; <div id="app"></div>
 ;; <script src="js/dev-app.js"></script>
 (defn web-entry [{:keys [deploy-type]}]
-  (let [prod? (= deploy-type :prod)
-        js (if prod? "wandering/js/main.js" "wandering/js/dev-app.js")]
+  (let [prod? (= deploy-type :prod)]
     (fn [env match]
-      {:status  200
-       :headers {"Content-Type" "text/html"}
-       :body    (hiccup/html [:head
-                              [:meta {:charset "UTF-8"}]
-                              [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
-                              [:title "Document Site"]
-                              [:link {:rel "icon" :href "wandering/favicon.ico" :type "image/x-icon"}]
-                              [:link {:rel "shortcut icon" :href "wandering/favicon.ico" :type "image/x-icon"}]
-                              [:link {:rel "stylesheet" :href "wandering/css/app.css"}]
-                              [:link {:rel "stylesheet" :href "wandering/css/font-awesome.min.css"}]
-                              ]
-                             [:body
-                              [:div {:id "app"}]
-                              [:script {:src js}]])})))
+      (let [port (-> env :filesystem :config :value :port)
+            portify (fn [s] (if prod? (str ":" port "/" s) s))
+            js (portify "wandering/js/main.js")]
+        {:status  200
+         :headers {"Content-Type" "text/html"}
+         :body    (hiccup/html [:head
+                                [:meta {:charset "UTF-8"}]
+                                [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
+                                [:title "Document Site"]
+                                [:link {:rel "icon" :href (portify "wandering/favicon.ico") :type "image/x-icon"}]
+                                [:link {:rel "shortcut icon" :href (portify "wandering/favicon.ico") :type "image/x-icon"}]
+                                [:link {:rel "stylesheet" :href (portify "wandering/css/app.css")}]
+                                [:link {:rel "stylesheet" :href (portify "wandering/css/font-awesome.min.css")}]
+                                ]
+                               [:body
+                                [:div {:id "app"}]
+                                [:script {:src js}]])}))))
 
 #_(defn handle-index [env match]
   {:status 200

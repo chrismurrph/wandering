@@ -36,7 +36,7 @@
                 :source-paths ["src/client"]
                 ;; I think if optimizations becomes advanced then we will no longer need a main
                 :compiler     {:main                 "app.main"
-                               :asset-path           "wandering/js/prod"
+                               ;; :asset-path           "wandering/js/prod"
                                :output-to            "resources/public/wandering/js/main.js"
                                :output-dir           "resources/public/wandering/js/prod_out"
                                :optimizations        :whitespace
