@@ -9,5 +9,5 @@
 (defn -main
   "Main entry point for the server"
   [& args]
-  (let [system (sys/make-system args)]
+  (let [system (sys/make-system {:deploy-type :prod} args)]
     (component/start system)))

@@ -20,6 +20,7 @@
                  [cljsjs/showdown "1.4.2-0"]
                  [org.clojure/core.async "0.2.371"]
                  [com.andrewmcveigh/cljs-time "0.3.14"]
+                 [hiccup "1.0.5"]
                  ]
 
   :plugins [[lein-cljsbuild "1.1.3"]
@@ -36,7 +37,7 @@
                 :source-paths ["src/client" "dev/client"]
                 :figwheel     true
                 :compiler     {:main                 cljs.user
-                               :asset-path           "js/dev"
+                               :asset-path           "wandering/js/dev"
                                :output-to            "resources/public/wandering/js/dev-app.js"
                                :output-dir           "resources/public/wandering/js/dev"
                                :optimizations        :none
