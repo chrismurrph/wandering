@@ -79,28 +79,30 @@
      [:div {:id "main-app-area"}]
      [:script {:src "/reconnect/js/main.js" :type "text/javascript"}]]))
 
+(defn app-name-ify [deploy-type app-name s]
+  (let [prod? (= deploy-type :prod)]
+    (if prod? (str app-name "/" s) (str "wandering/" s))))
+
 ;; <div id="app"></div>
 ;; <script src="js/dev-app.js"></script>
-(defn web-entry [{:keys [deploy-type]}]
-  (let [prod? (= deploy-type :prod)]
-    (fn [env match]
-      (let [port (-> env :filesystem :config :value :port)
-            portify (fn [s] (if prod? (str ":" port "/" s) s))
-            js (portify "wandering/js/main.js")]
-        {:status  200
-         :headers {"Content-Type" "text/html"}
-         :body    (hiccup/html [:head
-                                [:meta {:charset "UTF-8"}]
-                                [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
-                                [:title "Document Site"]
-                                [:link {:rel "icon" :href (portify "wandering/favicon.ico") :type "image/x-icon"}]
-                                [:link {:rel "shortcut icon" :href (portify "wandering/favicon.ico") :type "image/x-icon"}]
-                                [:link {:rel "stylesheet" :href (portify "wandering/css/app.css")}]
-                                [:link {:rel "stylesheet" :href (portify "wandering/css/font-awesome.min.css")}]
-                                ]
-                               [:body
-                                [:div {:id "app"}]
-                                [:script {:src js}]])}))))
+(defn web-entry [app-name {:keys [deploy-type]}]
+  (fn [env match]
+    (let [namify (partial app-name-ify deploy-type app-name)
+          js (namify "js/main.js")]
+      {:status  200
+       :headers {"Content-Type" "text/html"}
+       :body    (hiccup/html [:head
+                              [:meta {:charset "UTF-8"}]
+                              [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
+                              [:title "Document Site"]
+                              [:link {:rel "icon" :href (namify "favicon.ico") :type "image/x-icon"}]
+                              [:link {:rel "shortcut icon" :href (namify "favicon.ico") :type "image/x-icon"}]
+                              [:link {:rel "stylesheet" :href (namify "css/app.css")}]
+                              [:link {:rel "stylesheet" :href (namify "css/font-awesome.min.css")}]
+                              ]
+                             [:body
+                              [:div {:id "app"}]
+                              [:script {:src js}]])})))
 
 #_(defn handle-index [env match]
   {:status 200
@@ -111,13 +113,13 @@
                       [:body [:div "some content"]])})
 
 (defn make-system [m args]
-  (let [arg (first args)
-        _ (println "arg from cmd line is: <" arg ">")
-        edn-file-name (if arg (str "/usr/local/etc/" arg ".edn") "/usr/local/etc/wandering.edn")]
+  (let [app-name (first args)
+        _ (println (str "arg from cmd line is: <" app-name ">"))
+        edn-file-name (if app-name (str "/usr/local/etc/" app-name ".edn") "/usr/local/etc/wandering.edn")]
     (core/make-untangled-server
       :config-path edn-file-name
       :parser (om/parser {:read logging-query :mutate logging-mutate})
       :parser-injections #{:filesystem}
       :components {:filesystem (build-filesystem-reader)}
-      :extra-routes {:routes   ["" {["/wandering"] :index}]
-                     :handlers {:index (web-entry m)}})))
+      :extra-routes {:routes   ["" {[(str "/" app-name)] :index}]
+                     :handlers {:index (web-entry app-name m)}})))
