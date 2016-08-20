@@ -7,6 +7,14 @@ figwheel_server.log
 /resources/public/wandering/css
 /resources/public/wandering/fonts
 /resources/config/wandering.edn
+/resources/public/uneasy/js
+/resources/public/uneasy/css
+/resources/public/uneasy/fonts
+/resources/config/uneasy.edn
+/resources/public/marketing/js
+/resources/public/marketing/css
+/resources/public/marketing/fonts
+/resources/config/marketing.edn
 /target
 /lib
 main.js

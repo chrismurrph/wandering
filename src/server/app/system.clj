@@ -122,4 +122,5 @@
       :parser-injections #{:filesystem}
       :components {:filesystem (build-filesystem-reader)}
       :extra-routes {:routes   ["" {[(str "/" app-name)] :index}]
-                     :handlers {:index (web-entry app-name m)}})))
+                     :handlers {:index (web-entry app-name m)}}
+      :app-name app-name)))
