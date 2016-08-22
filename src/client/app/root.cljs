@@ -19,9 +19,9 @@
   Object
   (cancel-sign-in-fn [this]
     (println "User cancelled, doing nothing, we ought to take user back to web page came from"))
-  (sign-in-fn [this un pw]
+  (sign-in-fn [this only-ph-for-pw? un pw]
     (println "Trying to sign in for: " un pw)
-    (ui/login-process! this un pw (-> (om/props this) :app/docs first :contacts)))
+    (ui/login-process! this only-ph-for-pw? un pw (-> (om/props this) :app/docs first :contacts)))
   (render [this]
     (let [{:keys [ui/react-key app/docs app/login-info]} (om/props this)
           the-doc (first docs)
@@ -34,6 +34,6 @@
       (dom/div #js{:key react-key}
                (if authenticated?
                  (ui/ui-showdown-document the-doc)
-                 (dialog/ui-login-dialog (om/computed the-login-info {:sign-in-fn        #(.sign-in-fn this %1 %2)
+                 (dialog/ui-login-dialog (om/computed the-login-info {:sign-in-fn        #(.sign-in-fn this %1 %2 %3)
                                                                       :cancel-sign-in-fn #(.cancel-sign-in-fn this)})))))))
 (reset! core/app (uc/mount @core/app Root "app"))

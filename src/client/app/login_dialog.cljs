@@ -14,17 +14,19 @@
   (query [this]
     [:id
      :app/authenticated?
-     :title])
+     :title
+     :only-ph-for-pw?])
   Object
   (initLocalState [this]
     {:un "" :pw ""})
   (sign-in [this un pw]
-    (let [{:keys [sign-in-fn]} (om/get-computed this)]
+    (let [{:keys [sign-in-fn]} (om/get-computed this)
+          {:keys [only-ph-for-pw?]} (om/props this)]
       ;(println "In sign in with " (om/get-computed this))
       (assert sign-in-fn)
-      (sign-in-fn un pw)))
+      (sign-in-fn only-ph-for-pw? un pw)))
   (render [this]
-    (let [{:keys [id app/authenticated? title]} (om/props this)
+    (let [{:keys [id app/authenticated? title only-ph-for-pw?]} (om/props this)
           ;_ (assert id (str "No id where props: " (om/props this)))
           ;_ (assert (u/boolean? authenticated?))
           ;_ (assert title (str "No title in LoginDialog: " (dissoc (om/props this) :om.next/computed)))

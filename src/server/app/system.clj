@@ -24,11 +24,12 @@
 (defrecord FileSystemReader [config]
   component/Lifecycle
   (start [this]
-    (let [{:keys [path-to-mkd-file path-to-contacts-file name company title phone email panel-height animation?] :as value} (:value config)
+    (let [{:keys [path-to-mkd-file path-to-contacts-file name company title phone email panel-height animation? only-ph-for-pw?] :as value} (:value config)
           _ (assert company)
           _ (assert title)
           _ (assert panel-height)
           _ (assert (boolean? animation?))
+          _ (assert (boolean? only-ph-for-pw?))
           _ (assert path-to-mkd-file (str "Got nufin from config for path-to-mkd-file: " value))
           _ (assert path-to-contacts-file (str "Got nufin from config for path-to-contacts-file: " value))
           markdown (read-raw-plan path-to-mkd-file)
@@ -36,6 +37,7 @@
           _ (assert (pos? (count contacts)))
           ]
       (assoc this :title title
+                  :only-ph-for-pw? only-ph-for-pw?
                   :markdown markdown
                   :contacts contacts
                   :panel-height panel-height
@@ -60,29 +62,11 @@
   (timbre/info "Query: " (op/ast->expr ast))
   (api/api-read env k params))
 
-;; resources/public is assumed (see /css and /js):
-(defn handle-index-1 [env match]
-  (hiccup/html
-    [:head
-     [:meta {:charset "UTF-8"}]
-     [:meta {:name "viewport" :content "width=device-width, initial-scale=1"}]
-     [:link {:rel "stylesheet" :href "/reconnect/css/base.css" :type "text/css"}]
-     [:link {:rel "stylesheet" :href "/reconnect/css/pure.css" :type "text/css"}]
-     [:link {:rel "stylesheet" :href "/reconnect/css/grids-responsive.css" :type "text/css"}]
-     [:link {:rel "stylesheet" :href "/reconnect/css/app.css" :type "text/css"}]
-     [:link {:rel "stylesheet" :href "/reconnect/css/font-awesome.min.css" :type "text/css"}]
-     [:link {:rel "stylesheet" :href "http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" :type "text/css"}]
-     [:script {:src "http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js" :charset "utf-8"}]
-     [:script {:src "//d3js.org/d3.v3.min.js" :charset "utf-8"}]]
-    [:body
-     [:div {:id "mapid"}]
-     [:div {:id "main-app-area"}]
-     [:script {:src "/reconnect/js/main.js" :type "text/javascript"}]]))
-
 (defn app-name-ify [deploy-type app-name s]
   (let [prod? (= deploy-type :prod)]
     (if prod? (str app-name "/" s) (str "wandering/" s))))
 
+;; resources/public is assumed (see /css and /js):
 ;; <div id="app"></div>
 ;; <script src="js/dev-app.js"></script>
 (defn web-entry [app-name {:keys [deploy-type]}]

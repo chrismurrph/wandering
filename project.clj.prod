@@ -26,35 +26,42 @@
   :plugins [[lein-cljsbuild "1.1.3"]
             [lein-less "1.7.5"]]
 
-  :source-paths ["dev/server" "src/server"]
-  :test-paths ["test/client"]
+  :source-paths ["src/server"]
+
   :jvm-opts ["-server" "-Xmx1024m" "-Xms512m" "-XX:-OmitStackTraceInFastThrow"]
-  :clean-targets ^{:protect false} ["resources/public/wandering/js" "target"]
+  :clean-targets ^{:protect false} ["target"]
 
   :cljsbuild {:builds
-              [{:id           "dev"
-                :source-paths ["src/client" "dev/client"]
-                :figwheel     true
-                :compiler     {:main                 cljs.user
-                               :asset-path           "wandering/js/dev"
-                               :output-to            "resources/public/wandering/js/main.js"
-                               :output-dir           "resources/public/wandering/js/dev"
-                               :optimizations        :none
+              [{:id           "marketing"
+                :source-paths ["src/client"]
+                ;; I think if optimizations becomes advanced then we will no longer need a main
+                :compiler     {:main                 "app.main"
+                               ;; :asset-path           "wandering/js/prod"
+                               :output-to            "resources/public/marketing/js/main.js"
+                               :output-dir           "resources/public/marketing/js/prod_out"
+                               :optimizations        :whitespace
                                :parallel-build       false
                                :verbose              false
                                :recompile-dependents true
                                :source-map-timestamp true}}
-               {:id           "test"
-                :source-paths ["test/client" "src/client"]
-                :figwheel     true
-                :compiler     {:main                 app.suite
-                               :output-to            "resources/public/wandering/js/specs.js"
-                               :output-dir           "resources/public/wandering/js/specs"
-                               :asset-path           "wandering/js/specs"
+               {:id           "uneasy"
+                :source-paths ["src/client"]
+                ;; I think if optimizations becomes advanced then we will no longer need a main
+                :compiler     {:main                 "app.main"
+                               ;; :asset-path           "wandering/js/prod"
+                               :output-to            "resources/public/uneasy/js/main.js"
+                               :output-dir           "resources/public/uneasy/js/prod_out"
+                               :optimizations        :whitespace
+                               :parallel-build       false
+                               :verbose              false
                                :recompile-dependents true
-                               :optimizations        :none}}]}
+                               :source-map-timestamp true}}]}
 
   :less {:source-paths ["less/app.main.less"]
-         :target-path  "resources/public/wandering/css/app.css"}
+         :target-path  "resources/public/css/app.css"}
 
-  :repl-options {:init-ns user})
+  :main app.main
+  :aot [app.main]
+
+  )
+

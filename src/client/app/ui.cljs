@@ -219,16 +219,20 @@
                                  (ui-signature signature)))))))
 (def ui-showdown-document (om/factory ShowdownDocument {:keyfn :id}))
 
+(defn boolean? [v]
+  (or (true? v) (false? v)))
+
 ;;
 ;; Needs to update app/login-info in app state
 ;; This is completely wrong but will do for now - later will leave contacts on the server and so do a mutation that
 ;; goes to the server to change authenicated?, which resides on the server, and we have a read that brings
-;; authenticated? into here. Wait till the reference documentation is finished.
+;; authenticated? into here. Wait till the Untangled reference documentation is finished.
 ;;
 ;; For now just work out the result and transact! so that authenicated? in client gets changed
 ;;
-(defn login-process! [component un pw contacts]
-  (let [user-id (str/trim un)
+(defn login-process! [component only-ph-for-pw? un pw contacts]
+  (let [_ (assert (boolean? only-ph-for-pw?))
+        user-id (str/trim un)
         pass-id (str/trim pw)
         _ (assert (pos? (count contacts)))
         ]
@@ -236,7 +240,8 @@
     (if (or (str/blank? user-id) (str/blank? pass-id))
       (js/alert "Please enter user-id and pass-id first")
       (let [contact (some (fn [c] (when (u/=ignore-case (:first c) user-id) c)) contacts)
-            pw-match? (and contact (or (u/=ignore-case (:last contact) pass-id) (some #(u/phone-match? pass-id %) (:phones contact))))
+            pw-match? (and contact (or (and (not only-ph-for-pw?) (u/=ignore-case (:last contact) pass-id))
+                                       (some #(u/phone-match? pass-id %) (:phones contact))))
             okay? pw-match?]
         (when okay?
           (om/transact! component '[(app/authenticate)]))))))

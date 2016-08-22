@@ -9,12 +9,13 @@
     [app.ui :as ui]
     [app.login-dialog :as ld]))
 
-;; Either "marketing" or "uneasy"
-(def app-name "marketing")
+;; Either "marketing" or "uneasy" for prod build, and uncomment networking below
+;; When developing simply go in as http://localhost:3000/ from browser
+(def app-name "uneasy")
 (def specific-url (str app-name "/api"))
 
 (defonce app (atom (uc/new-untangled-client
-                     :networking (net/make-untangled-network specific-url :global-error-callback (constantly nil))
+                     ;:networking (net/make-untangled-network specific-url :global-error-callback (constantly nil))
                      :started-callback
                      (fn [{:keys [reconciler]}]
                        (df/load-data reconciler [{:imported-docs (om/get-query ui/ShowdownDocument)}

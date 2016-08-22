@@ -33,7 +33,7 @@
 (defn init
   "Create a web server from configurations. Use `start` to start it."
   []
-  (reset! system (sys/make-system {:deploy-type :dev} ["wandering"])))
+  (reset! system (sys/make-system {:deploy-type :dev} [nil])))
 
 (defn start "Start (an already initialized) web server." [] (swap! system component/start))
 
