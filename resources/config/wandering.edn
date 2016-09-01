@@ -1,5 +1,5 @@
 {:port    3000
- :path-to-mkd-file "/home/chris/state/marketing_for_kevin"
+ :path-to-mkd-file "/home/chris/state/brothel/Transfer.md"
  :path-to-contacts-file "/opt/jetty/contacts.txt"
  :name "Chris Murphy"
  :title "Any title here"
@@ -8,4 +8,4 @@
  :email "chris@strandz.org"
  :panel-height 4525
  :animation? false
- :only-ph-for-pw? true}
+ :only-ph-for-pw? false}

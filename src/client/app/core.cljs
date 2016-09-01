@@ -11,6 +11,7 @@
 
 ;; Either "marketing" or "uneasy" for prod build, and uncomment networking below
 ;; When developing simply go in as http://localhost:3000/ from browser
+;; For server side just need to run the right script
 (def app-name "uneasy")
 (def specific-url (str app-name "/api"))
 
