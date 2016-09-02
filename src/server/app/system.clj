@@ -25,7 +25,8 @@
   component/Lifecycle
   (start [this]
     (let [{:keys [path-to-mkd-file path-to-contacts-file name company title phone email panel-height animation? only-ph-for-pw?] :as value} (:value config)
-          _ (assert company)
+          ;; Don't want to have to have
+          ;;_ (assert company)
           _ (assert title)
           _ (assert panel-height)
           _ (assert (boolean? animation?))

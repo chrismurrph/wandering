@@ -168,8 +168,9 @@
       (dom/div #js{:className "tubes-general-container"}
                (dom/div #js{:style style-js} name)
                (dom/br nil)
-               (dom/div #js{:className "fa fa-building-o fa-1x" :style style-js} (str " " company))
-               (dom/br nil)
+               (when company
+                 (dom/div #js{:className "fa fa-building-o fa-1x" :style style-js} (str " " company))
+                 (dom/br nil))
                (dom/div #js{:className "fa fa-phone fa-1x" :style style-js} (str " " phone))
                (dom/br nil)
                (dom/div #js{:className "fa fa-envelope fa-1x" :style style-js} (str " " email))

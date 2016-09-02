@@ -3,7 +3,7 @@
  :path-to-contacts-file "/opt/jetty/contacts.txt"
  :name "Chris Murphy"
  :title "Any title here"
- :company "Seaweed Software Pty Ltd"
+ ;:company "Seaweed Software Pty Ltd"
  :phone "0403 162 669"
  :email "chris@strandz.org"
  :panel-height 4525
