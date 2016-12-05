@@ -9,6 +9,9 @@
             [app.utils :as u]
             [app.molecules :as moles]))
 
+;;Might need
+;;(enable-console-print!)
+
 (defui ^:once Root
   static uc/InitialAppState
   (initial-state [clz params] {:app/docs [] :app/login-info []})
@@ -27,7 +30,6 @@
           the-doc (first docs)
           ;_ (assert the-doc)
           the-login-info (first login-info)
-          ;_ (assert the-login-info)
           {:keys [app/authenticated?]} the-login-info
           ;_ (assert (u/boolean? authenticated?) (str "authenticated? should exist in the-login-info: " the-login-info))
           ]

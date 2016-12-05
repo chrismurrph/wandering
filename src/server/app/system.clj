@@ -24,7 +24,7 @@
 (defrecord FileSystemReader [config]
   component/Lifecycle
   (start [this]
-    (let [{:keys [path-to-mkd-file path-to-contacts-file name company title phone email panel-height animation? only-ph-for-pw?] :as value} (:value config)
+    (let [{:keys [path-to-mkd-file alternative-mkd-file path-to-contacts-file name company title phone email panel-height animation? only-ph-for-pw?] :as value} (:value config)
           ;; Don't want to have to have
           ;;_ (assert company)
           _ (assert title)
@@ -33,18 +33,21 @@
           _ (assert (boolean? only-ph-for-pw?))
           _ (assert path-to-mkd-file (str "Got nufin from config for path-to-mkd-file: " value))
           _ (assert path-to-contacts-file (str "Got nufin from config for path-to-contacts-file: " value))
-          markdown (read-raw-plan path-to-mkd-file)
+          regular-markdown (read-raw-plan path-to-mkd-file)
+          alternative-markdown (read-raw-plan alternative-mkd-file)
           contacts (read-contacts path-to-contacts-file)
           _ (assert (pos? (count contacts)))
           ]
       (assoc this :title title
                   :only-ph-for-pw? only-ph-for-pw?
-                  :markdown markdown
+                  :regular-markdown regular-markdown
+                  :alternative-markdown alternative-markdown
+                  :path-to-mkd-file path-to-mkd-file
+                  :alternative-mkd-file alternative-mkd-file
                   :contacts contacts
                   :panel-height panel-height
                   :animation? animation?
-                  :signature {;:id (gensym)
-                              :name name
+                  :signature {:name name
                               :company company
                               :phone phone
                               :email email})))

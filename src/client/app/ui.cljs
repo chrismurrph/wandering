@@ -186,7 +186,8 @@
 (defui ^:once ShowdownDocument
   static om/IQuery
   (query [_] [:id
-              :markdown
+              :regular-markdown
+              :alternative-markdown
               :markup
               :contacts
               :panel-height
@@ -245,4 +246,4 @@
                                        (some #(u/phone-match? pass-id %) (:phones contact))))
             okay? pw-match?]
         (when okay?
-          (om/transact! component '[(app/authenticate)]))))))
+          (om/transact! component `[(app/authenticate {:special-person? ~(:special-person? contact)})]))))))

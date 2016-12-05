@@ -1,11 +1,12 @@
 {:port    3000
- :path-to-mkd-file "/home/chris/state/brothel/Transfer.md"
+ :path-to-mkd-file "/home/chris/marketing_for_kevin.md"
+ :alternative-mkd-file "/home/chris/marketing_for_kevin_2.md"
  :path-to-contacts-file "/opt/jetty/contacts.txt"
  :name "Chris Murphy"
  :title "Any title here"
  ;:company "Seaweed Software Pty Ltd"
  :phone "0403 162 669"
  :email "chris@strandz.org"
- :panel-height 4525
+ :panel-height 5525
  :animation? false
  :only-ph-for-pw? false}
