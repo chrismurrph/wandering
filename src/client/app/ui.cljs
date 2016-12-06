@@ -246,4 +246,4 @@
                                        (some #(u/phone-match? pass-id %) (:phones contact))))
             okay? pw-match?]
         (when okay?
-          (om/transact! component `[(app/authenticate {:special-person? ~(:special-person? contact)})]))))))
+          (om/transact! component `[(app/do-authentication {:special-person? ~(:special-person? contact)})]))))))

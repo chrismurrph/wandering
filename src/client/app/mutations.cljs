@@ -27,12 +27,12 @@
     ;; methods you call will generally need to be called out as prototype values in the externs
     (.makeHtml converter md)))
 
-(defmethod m/mutate 'app/authenticate
+(defmethod m/mutate 'app/do-authentication
   [{:keys [state]} _ {:keys [special-person?]}]
   (let [kw (if special-person? :alternative-markdown :regular-markdown)
         markdown (get-in @state [:doc/by-id 1 kw])
         text (convert-to-html markdown)
-        _ (println (str "special person " special-person? " so used: " kw))
+        _ (println (str "special person " special-person? " so using: " kw))
         ]
     {:action (fn []
                (swap! state #(-> %
