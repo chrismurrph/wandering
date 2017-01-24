@@ -13,7 +13,9 @@
   (or (true? v) (false? v)))
 
 (defn read-raw-plan [file-name]
-  (let [md-str-in (slurp file-name)]
+  (let [_ (println file-name)
+        md-str-in (slurp file-name)
+        ]
     md-str-in))
 
 (defn read-contacts [file-name]
