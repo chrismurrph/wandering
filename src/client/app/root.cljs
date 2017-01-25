@@ -1,7 +1,7 @@
 (ns app.root
   (:require [om.dom :as dom]
             [om.next :as om :refer-macros [defui]]
-            yahoo.intl-messageformat-with-locales
+    ;yahoo.intl-messageformat-with-locales
             [untangled.client.core :as uc]
             [app.core :as core]
             [app.ui :as ui]
@@ -9,8 +9,7 @@
             [app.utils :as u]
             [app.molecules :as moles]))
 
-;;Might need
-;;(enable-console-print!)
+(enable-console-print!)
 
 (defui ^:once Root
   static uc/InitialAppState
@@ -28,14 +27,18 @@
   (render [this]
     (let [{:keys [ui/react-key app/docs app/login-info]} (om/props this)
           the-doc (first docs)
-          ;_ (assert the-doc)
+          preview-mode? (:preview-mode? the-doc)
           the-login-info (first login-info)
           {:keys [app/authenticated?]} the-login-info
           ;_ (assert (u/boolean? authenticated?) (str "authenticated? should exist in the-login-info: " the-login-info))
           ]
       (dom/div #js{:key react-key}
                (if authenticated?
-                 (ui/ui-showdown-document the-doc)
+                 (do
+                   (assert (boolean? preview-mode?))
+                   (if preview-mode?
+                     (ui/ui-preview-component)
+                     (ui/ui-showdown-document the-doc)))
                  (dialog/ui-login-dialog (om/computed the-login-info {:sign-in-fn        #(.sign-in-fn this %1 %2 %3)
                                                                       :cancel-sign-in-fn #(.cancel-sign-in-fn this)})))))))
 (reset! core/app (uc/mount @core/app Root "app"))

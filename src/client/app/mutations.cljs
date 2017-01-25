@@ -8,6 +8,12 @@
   {:action (fn []
              (swap! state assoc :app/elapsed elapsed))})
 
+(defmethod m/mutate 'app/exit-preview-mode
+  [{:keys [state]} _ _]
+  {:action (fn []
+             (swap! state (fn [st]
+                            (assoc-in st [:doc/by-id 1 :preview-mode?] false))))})
+
 (defmethod m/mutate 'app/bg-colour-change
   [{:keys [state]} _ {:keys [seconds-elapsed]}]
   {:action (fn []
@@ -29,15 +35,16 @@
 
 (defmethod m/mutate 'app/do-authentication
   [{:keys [state]} _ {:keys [special-person?]}]
-  (let [kw (if special-person? :alternative-markdown :regular-markdown)
-        markdown (get-in @state [:doc/by-id 1 kw])
+  (let [markdown (get-in @state [:doc/by-id 1 :regular-markdown])
         text (convert-to-html markdown)
-        _ (println (str "special person " special-person? " so using: " kw))
+        _ (println (str "special person " special-person? " - now not used"))
         ]
     {:action (fn []
                (swap! state #(-> %
                                  (assoc-in [:login-dlg/by-id 2 :app/authenticated?] true)
                                  (assoc-in [:doc/by-id 1 :special-person?] special-person?)
+                                 ;; Will be changed later when the special person presses the button
+                                 (assoc-in [:doc/by-id 1 :preview-mode?] special-person?)
                                  (assoc-in [:doc/by-id 1 :markup] text))))}))
 
 (defmethod m/mutate 'fetch/init-state-loaded

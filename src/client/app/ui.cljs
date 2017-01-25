@@ -183,10 +183,18 @@
   static om/IQuery
   (query [_] [:id :red :green :blue]))
 
+(defui ^:once PreviewComponent
+  Object
+  (render [this]
+    (dom/p #js {:className "dialog-buttons"}
+           (dom/button #js{:onClick #(om/transact! this '[(app/exit-preview-mode)])} "Next"))))
+(def ui-preview-component (om/factory PreviewComponent))
+
 (defui ^:once ShowdownDocument
   static om/IQuery
   (query [_] [:id
               :regular-markdown
+              :preview-mode?
               :alternative-markdown
               :markup
               :contacts
@@ -221,7 +229,7 @@
                                  (ui-signature signature)))))))
 (def ui-showdown-document (om/factory ShowdownDocument {:keyfn :id}))
 
-(defn boolean? [v]
+#_(defn boolean? [v]
   (or (true? v) (false? v)))
 
 ;;
