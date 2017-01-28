@@ -41,6 +41,7 @@
                                :output-to            "resources/public/wandering/js/main.js"
                                :output-dir           "resources/public/wandering/js/dev"
                                :optimizations        :none
+                               :preloads             []
                                :parallel-build       false
                                :verbose              false
                                :recompile-dependents true

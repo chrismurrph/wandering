@@ -1,5 +1,6 @@
 {:port    3000
  :path-to-mkd-file "/home/chris/marketing_for_kevin_2.md"
+ :path-to-emails-file "/home/chris/howell_emails.md"
  :path-to-contacts-file "/opt/jetty/contacts.txt"
  :name "Chris Murphy"
  :title "Any title here"

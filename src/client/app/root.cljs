@@ -27,18 +27,14 @@
   (render [this]
     (let [{:keys [ui/react-key app/docs app/login-info]} (om/props this)
           the-doc (first docs)
-          preview-mode? (:preview-mode? the-doc)
+          _ (println "the-doc keys: " (keys the-doc))
           the-login-info (first login-info)
           {:keys [app/authenticated?]} the-login-info
           ;_ (assert (u/boolean? authenticated?) (str "authenticated? should exist in the-login-info: " the-login-info))
           ]
       (dom/div #js{:key react-key}
                (if authenticated?
-                 (do
-                   (assert (boolean? preview-mode?))
-                   (if preview-mode?
-                     (ui/ui-preview-component)
-                     (ui/ui-showdown-document the-doc)))
+                 (ui/ui-showdown-document the-doc)
                  (dialog/ui-login-dialog (om/computed the-login-info {:sign-in-fn        #(.sign-in-fn this %1 %2 %3)
                                                                       :cancel-sign-in-fn #(.cancel-sign-in-fn this)})))))))
 (reset! core/app (uc/mount @core/app Root "app"))

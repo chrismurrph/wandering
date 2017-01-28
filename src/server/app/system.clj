@@ -23,10 +23,20 @@
         res (json/read-str contacts :key-fn clojure.core/keyword)]
     res))
 
+(def bridging-text "\nSee **appendix H** for where CMTS currently stands on this issue.\n\nAppendix H - Request for Zero upfront charge email interaction (19/01/2017)\n")
+
+;;
+;; Specific function. Shows email interaction only to special people
+;;
+(defn merge-files [plan emails]
+  (let [plan-str-in (slurp plan)
+        emails-str-in (slurp emails)]
+    (str plan-str-in bridging-text emails-str-in)))
+
 (defrecord FileSystemReader [config]
   component/Lifecycle
   (start [this]
-    (let [{:keys [path-to-mkd-file path-to-contacts-file name company title phone email panel-height animation? only-ph-for-pw?] :as value} (:value config)
+    (let [{:keys [path-to-mkd-file path-to-emails-file path-to-contacts-file name company title phone email panel-height animation? only-ph-for-pw?] :as value} (:value config)
           ;; Don't want to have to have
           ;;_ (assert company)
           _ (assert title)
@@ -34,15 +44,20 @@
           _ (assert (boolean? animation?))
           _ (assert (boolean? only-ph-for-pw?))
           _ (assert path-to-mkd-file (str "Got nufin from config for path-to-mkd-file: " value))
+          _ (assert path-to-emails-file (str "Got nufin from config for path-to-emails-file: " value))
           _ (assert path-to-contacts-file (str "Got nufin from config for path-to-contacts-file: " value))
           regular-markdown (read-raw-plan path-to-mkd-file)
+          emails-included-markdown (str regular-markdown bridging-text (slurp path-to-emails-file))
           contacts (read-contacts path-to-contacts-file)
           _ (assert (pos? (count contacts)))
+          _ (assert (pos? (- (count emails-included-markdown) (count regular-markdown))))
           ]
       (assoc this :title title
                   :only-ph-for-pw? only-ph-for-pw?
                   :regular-markdown regular-markdown
+                  :emails-included-markdown emails-included-markdown
                   :path-to-mkd-file path-to-mkd-file
+                  :path-to-emails-file path-to-emails-file
                   :contacts contacts
                   :panel-height panel-height
                   :animation? animation?
@@ -111,3 +126,6 @@
       :extra-routes {:routes   ["" {[(str "/" app-name)] :index}]
                      :handlers {:index (web-entry app-name m)}}
       :app-name app-name)))
+
+(defn x-1 []
+  (println (merge-files "/home/chris/marketing_for_kevin_2.md" "/home/chris/howell_emails.md")))

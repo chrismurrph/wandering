@@ -8,12 +8,6 @@
   {:action (fn []
              (swap! state assoc :app/elapsed elapsed))})
 
-(defmethod m/mutate 'app/exit-preview-mode
-  [{:keys [state]} _ _]
-  {:action (fn []
-             (swap! state (fn [st]
-                            (assoc-in st [:doc/by-id 1 :preview-mode?] false))))})
-
 (defmethod m/mutate 'app/bg-colour-change
   [{:keys [state]} _ {:keys [seconds-elapsed]}]
   {:action (fn []
@@ -27,6 +21,7 @@
   ;; note the syntax below: js/VarFromExternsFile.property
   ;; the dot on the end is the usual Clojure interop syntax: (Constructor. constructor-arg constructor-arg)
   ;; #js {:tables true}
+  (assert md "Need markdown to make markup")
   (let [converter (js/showdown.Converter.)                  ;;#js {:tables true}
         _ (.setOption converter "tables" true)
         ]
@@ -35,16 +30,16 @@
 
 (defmethod m/mutate 'app/do-authentication
   [{:keys [state]} _ {:keys [special-person?]}]
-  (let [markdown (get-in @state [:doc/by-id 1 :regular-markdown])
+  (let [sp? (boolean special-person?)
+        kw (if sp? :emails-included-markdown :regular-markdown)
+        markdown (get-in @state [:doc/by-id 1 kw])
         text (convert-to-html markdown)
-        _ (println (str "special person " special-person? " - now not used"))
+        _ (println (str "special person " sp? " - so emails will be seen: markup: " (count text)))
         ]
     {:action (fn []
                (swap! state #(-> %
                                  (assoc-in [:login-dlg/by-id 2 :app/authenticated?] true)
-                                 (assoc-in [:doc/by-id 1 :special-person?] special-person?)
-                                 ;; Will be changed later when the special person presses the button
-                                 (assoc-in [:doc/by-id 1 :preview-mode?] special-person?)
+                                 (assoc-in [:doc/by-id 1 :special-person?] sp?)
                                  (assoc-in [:doc/by-id 1 :markup] text))))}))
 
 (defmethod m/mutate 'fetch/init-state-loaded
