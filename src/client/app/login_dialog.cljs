@@ -8,8 +8,8 @@
   ;static uc/InitialAppState
   ;(initial-state [clz params] {:id 2 :app/name (:app/name params) :app/authenticated? false :title "Default Title"})
   static om/Ident
-  (ident [this props]
-    [:login-dlg/by-id (:id props)])
+  (ident [this _]
+    [:login-dlg/by-id 2])
   static om/IQuery
   (query [this]
     [:id

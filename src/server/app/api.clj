@@ -19,4 +19,4 @@
   {:value [(merge {:id 1} (select-keys filesystem [:regular-markdown :emails-included-markdown :signature :contacts :panel-height :animation?]))]})
 
 (defmethod api-read :imported-logins [{:keys [filesystem]} _ _]
-  {:value [(merge {:id 2 :app/authenticated? false :title "Default title" :only-ph-for-pw? false} (select-keys filesystem [:id :title :only-ph-for-pw?]))]})
+  {:value [(merge {:id 2 :app/authenticated? false :title "Default title" :only-ph-for-pw? false} (select-keys filesystem [:title :only-ph-for-pw?]))]})

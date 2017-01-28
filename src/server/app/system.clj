@@ -23,7 +23,7 @@
         res (json/read-str contacts :key-fn clojure.core/keyword)]
     res))
 
-(def bridging-text "\nSee **appendix H** for where CMTS currently stands on this issue.\n\nAppendix H - Request for Zero upfront charge email interaction (19/01/2017)\n")
+(def bridging-text "\nSee **appendix H** for where CMTS currently stands on this issue.\n\nAppendix H - Request for Zero upfront charge email interaction (19/01/2017)\n------\n")
 
 ;;
 ;; Specific function. Shows email interaction only to special people

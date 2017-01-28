@@ -158,7 +158,7 @@
 
 (defui ^:once Signature
   static om/Ident
-  (ident [_ {:keys [id]}] [:signature/by-id id])
+  (ident [_ _] [:signature/by-id 3])
   static om/IQuery
   (query [_] [:id :name :company :phone :email])
   Object
@@ -195,7 +195,7 @@
               {:signature (om/get-query Signature)}
               {:bg-colour (om/get-query BackgroundColour)}])
   static om/Ident
-  (ident [_ {:keys [id]}] [:doc/by-id id])
+  (ident [_ _] [:doc/by-id 1])
   Object
   (colour-change [this elapsed]
     (om/transact! this `[(app/bg-colour-change {:seconds-elapsed ~(/ elapsed moles/fps)}) :doc/by-id]))

@@ -95,7 +95,7 @@
      :speed                   (:speed pick)
      :start-degrees-angle     (int (mu/radians->degrees (mu/random-angle)))
      :change-by-degrees-angle (- (mu/random-float 0 1) 0.5)
-     :panel-height panel-height
+     :panel-height            panel-height
      }))
 
 (defn emit-molecule-particles

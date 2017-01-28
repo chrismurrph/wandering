@@ -32,6 +32,7 @@
   [{:keys [state]} _ {:keys [special-person?]}]
   (let [sp? (boolean special-person?)
         kw (if sp? :emails-included-markdown :regular-markdown)
+        extra-height (if sp? 1270 0)
         markdown (get-in @state [:doc/by-id 1 kw])
         text (convert-to-html markdown)
         _ (println (str "special person " sp? " - so emails will be seen: markup: " (count text)))
@@ -40,7 +41,8 @@
                (swap! state #(-> %
                                  (assoc-in [:login-dlg/by-id 2 :app/authenticated?] true)
                                  (assoc-in [:doc/by-id 1 :special-person?] sp?)
-                                 (assoc-in [:doc/by-id 1 :markup] text))))}))
+                                 (assoc-in [:doc/by-id 1 :markup] text)
+                                 (update-in [:doc/by-id 1 :panel-height] (fn [ph] (+ extra-height ph))))))}))
 
 (defmethod m/mutate 'fetch/init-state-loaded
   [{:keys [state]} _ _]
