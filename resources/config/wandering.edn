@@ -8,5 +8,5 @@
  :phone "0403 162 669"
  :email "chris@strandz.org"
  :panel-height 6585
- :animation? false
+ :animation? true
  :only-ph-for-pw? false}

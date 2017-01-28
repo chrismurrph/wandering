@@ -11,7 +11,7 @@
 (defmethod m/mutate 'app/bg-colour-change
   [{:keys [state]} _ {:keys [seconds-elapsed]}]
   {:action (fn []
-             (swap! state (fn [st]
+             #_(swap! state (fn [st]
                             (let [bg-colour {:red   (moles/red-pulse seconds-elapsed)
                                              :green (moles/green-pulse seconds-elapsed)
                                              :blue  (moles/blue-pulse seconds-elapsed)}]
@@ -35,7 +35,7 @@
         extra-height (if sp? 1270 0)
         markdown (get-in @state [:doc/by-id 1 kw])
         text (convert-to-html markdown)
-        _ (println (str "special person " sp? " - so emails will be seen: markup: " (count text)))
+        _ (println (str "special person " sp? " - tells whether emails will be seen, markup: " (count text)))
         ]
     {:action (fn []
                (swap! state #(-> %

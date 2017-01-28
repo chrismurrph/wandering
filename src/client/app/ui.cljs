@@ -29,13 +29,13 @@
                      :y           y
                      :stroke      colour
                      :fill        colour
-                     :stroke-with 10
+                     :strokeWidth 2
                      ;; Without x and y they don't start off in the hatchery area. i.e. x and y not respected
                      :transform   (str "rotate(" last-degrees-angle "," centre-x "," centre-y ")")
                      :dx          side-length
                      :dy          side-length
-                     :font-family "Verdana"
-                     :font-size   55
+                     :fontFamily  "Verdana"
+                     :fontSize    20
                      }]
       (dom/text (clj->js svg-props) symbol-txt))))
 (def molecule-comp (om/factory Molecule {:keyfn :id}))
@@ -57,7 +57,7 @@
                       :y         y
                       :width     side-length
                       :height    side-length
-                      :opacity   0.2
+                      :opacity   0.1
                       ;; Harder to see than not having
                       :fill      (str "rgba(" r "," g "," b "," saturation ")")
                       ;; Without x and y they don't start off in the hatchery area. i.e. x and y not respected
@@ -105,12 +105,12 @@
         _ (u/log-off (str "elapsed: " elapsed))]
     (cond
       (< elapsed 0) (mark-time state)
-      (< elapsed 3000) (let [{:keys [molecule-particles elapsed] :as new-state} (emit-and-move-molecules panel-height state)
+      (< elapsed 2500) (let [{:keys [molecule-particles elapsed] :as new-state} (emit-and-move-molecules panel-height state)
                              _ (om/update-state! component assoc :local-particles molecule-particles)]
                          (when (moles/ten-second-mark? elapsed)
                            (colour-change-fn elapsed))
                          new-state)
-      (= elapsed 3000) (let [new-state (start-over state)
+      (= elapsed 2500) (let [new-state (start-over state)
                              _ (om/update-state! component assoc :local-particles [])]
                          new-state))))
 
@@ -196,16 +196,16 @@
   (ident [_ _] [:doc/by-id 1])
   Object
   (colour-change [this elapsed]
-    (om/transact! this `[(app/bg-colour-change {:seconds-elapsed ~(/ elapsed moles/fps)}) :doc/by-id]))
+    #_(om/transact! this `[(app/bg-colour-change {:seconds-elapsed ~(/ elapsed moles/fps)}) :doc/by-id]))
   (render [this]
     (let [{:keys [markup signature bg-colour panel-height animation?]} (om/props this)
           ;_ (println "panel height coming thru: " panel-height)
           ;_ (println "bg-colour coming thru: " bg-colour)
           {:keys [red green blue]} bg-colour
-          red (or red (moles/red-pulse 1))
-          green (or green (moles/green-pulse 1))
-          blue (or blue (moles/blue-pulse 1))
-          background-fill (str "rgba(" red "," green "," blue ",0.3)")
+          ;red (or red (moles/red-pulse 1))
+          ;green (or green (moles/green-pulse 1))
+          ;blue (or blue (moles/blue-pulse 1))
+          background-fill (str "rgba(" 245 "," 245 "," 245 ",0.3)")
           titled-markup (centre-first-heading markup)
           ]
       (dom/div #js{:className "container" :style #js{:width  (str moles/panel-width "px")
