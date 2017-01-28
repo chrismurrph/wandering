@@ -1,10 +1,8 @@
 (ns app.core
   (:require
     app.mutations
-    cljsjs.showdown
     [untangled.client.data-fetch :as df]
     [untangled.client.core :as uc]
-    [untangled.client.impl.network :as net]
     [om.next :as om]
     [app.ui :as ui]
     [app.login-dialog :as ld]))

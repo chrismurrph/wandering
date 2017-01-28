@@ -1,13 +1,9 @@
 (ns app.root
-  (:require [om.dom :as dom]
-            [om.next :as om :refer-macros [defui]]
-    ;yahoo.intl-messageformat-with-locales
+  (:require [om.next :as om :refer-macros [defui]]
             [untangled.client.core :as uc]
             [app.core :as core]
             [app.ui :as ui]
-            [app.login-dialog :as dialog]
-            [app.utils :as u]
-            [app.molecules :as moles]))
+            [app.login-dialog :as dialog]))
 
 (enable-console-print!)
 

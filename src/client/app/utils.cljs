@@ -1,7 +1,6 @@
 (ns app.utils
   (:require [clojure.string :as str]
-            [cljs.core.async
-             :refer [<! >! chan close! put! timeout]])
+            [cljs.core.async :refer [<! >! chan close! put! timeout]])
   (:require-macros [cljs.core.async.macros :refer [go-loop]]))
 
 ;;

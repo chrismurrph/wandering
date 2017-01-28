@@ -1,11 +1,9 @@
 (ns app.ui
-  (:require [om.dom :as dom]
+  (:require [om.dom]
             [om.next :as om :refer-macros [defui]]
-            yahoo.intl-messageformat-with-locales
             [app.molecules :as moles]
             [app.utils :as u]
-            [cljs.core.async
-             :refer [<! >! chan close! put! timeout]]
+            [cljs.core.async :refer [<! >! chan close! put! timeout]]
             [clojure.string :as str]
             [cljs-time.core :as time]
             [cljs-time.format :as format-time]

@@ -1,8 +1,6 @@
 (ns app.login-dialog
   (:require [om.next :as om :refer-macros [defui]]
-            [om.dom :as dom]
-            [app.utils :as u]
-            [untangled.client.core :as uc]))
+            [om.dom :as dom]))
 
 (defui LoginDialog
   ;static uc/InitialAppState

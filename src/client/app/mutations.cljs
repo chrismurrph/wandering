@@ -1,5 +1,5 @@
 (ns app.mutations
-  (:require [cljsjs.showdown]
+  (:require cljsjs.showdown
             [untangled.client.mutations :as m]
             [app.molecules :as moles]))
 
