@@ -1,5 +1,5 @@
 (ns app.ui
-  (:require [om.dom]
+  (:require [om.dom :as dom]
             [om.next :as om :refer-macros [defui]]
             [app.molecules :as moles]
             [app.utils :as u]
