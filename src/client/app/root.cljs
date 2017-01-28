@@ -1,5 +1,6 @@
 (ns app.root
-  (:require [om.next :as om :refer-macros [defui]]
+  (:require [om.dom :as dom]
+            [om.next :as om :refer-macros [defui]]
             [untangled.client.core :as uc]
             [app.core :as core]
             [app.ui :as ui]
@@ -23,7 +24,7 @@
   (render [this]
     (let [{:keys [ui/react-key app/docs app/login-info]} (om/props this)
           the-doc (first docs)
-          _ (println "the-doc keys: " (keys the-doc))
+          ;_ (println "the-doc keys: " (keys the-doc))
           the-login-info (first login-info)
           {:keys [app/authenticated?]} the-login-info
           ;_ (assert (u/boolean? authenticated?) (str "authenticated? should exist in the-login-info: " the-login-info))
