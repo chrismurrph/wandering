@@ -5,16 +5,17 @@
     [untangled.client.core :as uc]
     [om.next :as om]
     [app.ui :as ui]
-    [app.login-dialog :as ld]))
+    [app.login-dialog :as ld]
+    [untangled.client.impl.network :as net]))
 
 ;; Either "marketing" or "uneasy" for prod build, and uncomment networking below
 ;; When developing simply go in as http://localhost:3000/ from browser
 ;; For server side just need to run the right script
-(def app-name "uneasy")
+(def app-name "marketing")
 (def specific-url (str app-name "/api"))
 
 (defonce app (atom (uc/new-untangled-client
-                     ;:networking (net/make-untangled-network specific-url :global-error-callback (constantly nil))
+                     :networking (net/make-untangled-network specific-url :global-error-callback (constantly nil))
                      :started-callback
                      (fn [{:keys [reconciler]}]
                        (df/load-data reconciler [{:imported-docs (om/get-query ui/ShowdownDocument)}
